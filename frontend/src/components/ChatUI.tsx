@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { getUser, logoutUser } from '@/auth';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// src/components/ChatUI.tsx
+import React, { useEffect, useState, useCallback } from "react";
+import { getUser, logoutUser } from "@/auth";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -21,43 +22,27 @@ const ChatUI = () => {
   const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [chatWindow, setChatWindow] = useState<Message[]>([]);
   const [showRenameModal, setShowRenameModal] = useState(false);
-  const [newChatName, setNewChatName] = useState('');
+  const [newChatName, setNewChatName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [assistantTyping, setAssistantTyping] = useState(false);
   const navigate = useNavigate();
 
-  // Verify session exists on backend
-  const verifySession = async (sessionId: string) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/stream-chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: sessionId,
-          messages: [],
-        }),
-      });
-      return res.status !== 404;
-    } catch {
-      return false;
-    }
+  const saveSessions = (updatedSessions: Session[]) => {
+    localStorage.setItem("sessions", JSON.stringify(updatedSessions));
   };
 
   const createNewSession = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/create-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
-      
-      if (!res.ok) {
-        throw new Error('Failed to create session');
-      }
-
+      if (!res.ok) throw new Error("Failed to create session");
       const data = await res.json();
-      if (data.status === 'success' && data.session_id) {
+      if (data.status === "success" && data.session_id) {
         const newSession: Session = {
           id: data.session_id,
           name: `Chat ${sessions.length + 1}`,
@@ -68,9 +53,10 @@ const ChatUI = () => {
         setCurrentSessionId(newSession.id);
         setChatWindow([]);
         saveSessions(updatedSessions);
+        window.history.pushState({}, "", `?session_id=${newSession.id}`);
         return newSession.id;
       }
-      throw new Error('Invalid session response');
+      throw new Error("Invalid session response");
     } catch (error) {
       console.error("Failed to create session:", error);
       toast.error("Failed to create new chat session");
@@ -78,18 +64,29 @@ const ChatUI = () => {
     }
   };
 
+  const verifySession = async (sessionId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/stream-chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, messages: [] }),
+      });
+      return res.status !== 404;
+    } catch {
+      return false;
+    }
+  };
+
   const initializeSessions = useCallback(async () => {
-    const saved = localStorage.getItem('sessions');
+    const saved = localStorage.getItem("sessions");
     if (saved) {
       const parsed: Session[] = JSON.parse(saved);
       if (parsed.length > 0) {
         const isValid = await verifySession(parsed[0].id);
         if (!isValid) {
-          localStorage.removeItem('sessions');
+          localStorage.removeItem("sessions");
           const newSessionId = await createNewSession();
-          if (newSessionId) {
-            setCurrentSessionId(newSessionId);
-          }
+          if (newSessionId) setCurrentSessionId(newSessionId);
         } else {
           setSessions(parsed);
           setCurrentSessionId(parsed[0].id);
@@ -124,62 +121,78 @@ const ChatUI = () => {
     fetchUser();
   }, [navigate, initializeSessions]);
 
-  const saveSessions = (updatedSessions: Session[]) => {
-    localStorage.setItem('sessions', JSON.stringify(updatedSessions));
-  };
-
   const sendMessage = async () => {
     if (!messageInput.trim() || !currentSessionId) {
-        toast.error("Please enter a message");
-        return;
+      toast.error("Please enter a message");
+      return;
     }
+    const userMessage: Message = { role: "user", content: messageInput.trim() };
 
-    const userMessage: Message = { role: 'user', content: messageInput.trim() };
-    updateCurrentSession(userMessage);
-    setMessageInput('');
+    // Add user message to chat window immediately
+    setChatWindow((prev) => [...prev, userMessage]);
+    setMessageInput("");
+    setAssistantTyping(true);
 
     try {
-        const res = await fetch(`${API_BASE_URL}/stream-chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                session_id: currentSessionId,
-                messages: [userMessage],
-            }),
-        });
+      const res = await fetch(`${API_BASE_URL}/stream-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          messages: [userMessage],
+        }),
+      });
 
-        if (!res.ok) {
-            if (res.status === 404) {
-                toast.error("Chat session expired. Creating new session...");
-                await createNewSession();
-                return;
-            }
-            throw new Error(`Server error: ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          toast.error("Chat session expired. Creating new session...");
+          await createNewSession();
+          return;
         }
+        throw new Error(`Server error: ${res.status}`);
+      }
 
-        const data = await res.json();
-        if (data.status === 'success') {
-            const assistantMessage: Message = {
-                role: 'assistant',
-                content: data.response || 'No response from server.'
+      const data = await res.json();
+      if (data.status === "success") {
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: data.response || "No response from server.",
+        };
+        // Add assistant message to chat window while preserving user message
+        setChatWindow((prev) => [...prev, assistantMessage]);
+        // Update session storage
+        const updatedSessions = sessions.map((session) => {
+          if (session.id === currentSessionId) {
+            return {
+              ...session,
+              messages: [...session.messages, userMessage, assistantMessage],
             };
-            updateCurrentSession(assistantMessage);
-        } else {
-            throw new Error(data.message || 'Unknown error');
-        }
-    } catch (error: any) {
-        console.error('Chat error:', error);
-        toast.error(`Error: ${error.message}`);
-        updateCurrentSession({
-            role: 'assistant',
-            content: `Error: ${error.message}`
+          }
+          return session;
         });
+        setSessions(updatedSessions);
+        saveSessions(updatedSessions);
+      } else {
+        throw new Error(data.message || "Unknown error");
+      }
+    } catch (error: any) {
+      console.error("Chat error:", error);
+      toast.error(`Error: ${error.message}`);
+      setChatWindow((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Error: ${error.message}`,
+        },
+      ]);
+    } finally {
+      setAssistantTyping(false);
     }
-};
+  };
 
   const updateCurrentSession = (msg: Message) => {
     const updatedSessions = sessions.map((session) => {
@@ -189,64 +202,59 @@ const ChatUI = () => {
       return session;
     });
     setSessions(updatedSessions);
-    setChatWindow(updatedSessions.find(s => s.id === currentSessionId)?.messages || []);
+    setChatWindow(
+      updatedSessions.find((s) => s.id === currentSessionId)?.messages || []
+    );
     saveSessions(updatedSessions);
   };
 
   const clearChatHistory = async () => {
     if (!currentSessionId) {
-        toast.error("No active session");
-        return;
+      toast.error("No active session");
+      return;
     }
-    if (!confirm('Are you sure you want to clear the chat history?')) {
-        return;
-    }
-    
+    if (!confirm("Are you sure you want to clear the chat history?")) return;
     try {
-        const res = await fetch(`${API_BASE_URL}/clear-history`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ session_id: currentSessionId }),
+      const res = await fetch(`${API_BASE_URL}/clear-history`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ session_id: currentSessionId }),
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
+      if (data.status === "success") {
+        const updatedSessions = sessions.map((session) => {
+          if (session.id === currentSessionId)
+            return { ...session, messages: [] };
+          return session;
         });
-        
-        if (!res.ok) {
-            throw new Error(`Server error: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        if (data.status === 'success') {
-            const updatedSessions = sessions.map(session => {
-                if (session.id === currentSessionId) {
-                    return { ...session, messages: [] };
-                }
-                return session;
-            });
-            setSessions(updatedSessions);
-            setChatWindow([]);
-            saveSessions(updatedSessions);
-            toast.success('Chat history cleared successfully');
-        } else {
-            throw new Error(data.message || 'Unknown error');
-        }
-    } catch (error) {
-        console.error('Clear history error:', error);
-        toast.error(`Error clearing chat history: ${error.message}`);
+        setSessions(updatedSessions);
+        setChatWindow([]);
+        saveSessions(updatedSessions);
+        toast.success("Chat history cleared successfully");
+      } else {
+        throw new Error(data.message || "Unknown error");
+      }
+    } catch (error: any) {
+      console.error("Clear history error:", error);
+      toast.error(`Error clearing chat history: ${error.message}`);
     }
-};
+  };
 
   const deleteChatSession = async () => {
     if (!currentSessionId) return;
-    if (!confirm('Are you sure you want to delete this chat session?')) return;
-    
-    const updatedSessions = sessions.filter(session => session.id !== currentSessionId);
+    if (!confirm("Are you sure you want to delete this chat session?")) return;
+    const updatedSessions = sessions.filter(
+      (session) => session.id !== currentSessionId
+    );
     setSessions(updatedSessions);
     saveSessions(updatedSessions);
-    
     if (updatedSessions.length > 0) {
       selectSession(updatedSessions[0].id);
+      window.history.pushState({}, "", `?session_id=${updatedSessions[0].id}`);
     } else {
       await createNewSession();
     }
@@ -254,135 +262,161 @@ const ChatUI = () => {
 
   const selectSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
-    const session = sessions.find(s => s.id === sessionId);
+    const session = sessions.find((s) => s.id === sessionId);
     setChatWindow(session ? session.messages : []);
+    window.history.pushState({}, "", `?session_id=${sessionId}`);
   };
 
   const openRenameModal = () => {
-    const session = sessions.find(s => s.id === currentSessionId);
+    const session = sessions.find((s) => s.id === currentSessionId);
     if (!session) return;
     setNewChatName(session.name);
     setShowRenameModal(true);
   };
+  
+  const TypingAnimation = () => (
+    <div className="flex space-x-2">
+      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce"></div>
+    </div>
+  );
 
   const saveChatName = () => {
     if (!newChatName.trim()) return;
-    const updatedSessions = sessions.map(session => {
-      if (session.id === currentSessionId) {
+    const updatedSessions = sessions.map((session) => {
+      if (session.id === currentSessionId)
         return { ...session, name: newChatName.trim() };
-      }
       return session;
     });
     setSessions(updatedSessions);
     saveSessions(updatedSessions);
     setShowRenameModal(false);
-    toast.success('Chat renamed successfully');
+    toast.success("Chat renamed successfully");
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className='flex items-center justify-center h-screen'>
+        Loading...
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      {/* Header */}
-      <header className="w-full h-12 flex items-center justify-between bg-gray-100 px-4 border-b">
-        <div className="flex items-center space-x-4">
-          <h3 className="text-xl font-bold">
-            {sessions.find(s => s.id === currentSessionId)?.name || 'Chat'}
+    <div className='flex h-screen flex-col'>
+      {/* Header with Chat Title and User Info */}
+      <header className='w-full flex items-center justify-between bg-white shadow px-4 py-3'>
+        <div className='flex items-center space-x-4'>
+          <h3 className='text-xl font-bold'>
+            {sessions.find((s) => s.id === currentSessionId)?.name || "Chat"}
           </h3>
           <button
             onClick={openRenameModal}
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className='text-sm text-blue-600 hover:underline'
           >
             Rename
           </button>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-neutral-900">
+        <div className='flex items-center space-x-4'>
+          <span className='text-sm text-gray-800'>
             Hi, {user?.name || user?.email || "User"}
-          </div>
+          </span>
           <button
             onClick={() => {
               logoutUser();
               localStorage.removeItem("sessions");
               navigate("/login");
             }}
-            className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+            className='px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600'
           >
             Logout
           </button>
         </div>
       </header>
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="w-72 bg-gray-800 text-white p-4">
-          <div className="mb-4">
-            <h2 className="text-xl">Chats</h2>
-            <div className="flex gap-2 mt-2">
+      <div className='flex flex-1'>
+        {/* Sidebar for Sessions */}
+        <aside className='w-72 bg-gray-800 text-white p-4'>
+          <div className='mb-4'>
+            <h2 className='text-xl font-bold'>Chats</h2>
+            <div className='flex gap-2 mt-2'>
               <button
                 onClick={createNewSession}
-                className="bg-green-600 px-2 py-1 rounded flex-1 hover:bg-green-700"
+                className='bg-green-600 px-2 py-1 rounded flex-1 hover:bg-green-700'
               >
                 + New Chat
               </button>
               <button
                 onClick={clearChatHistory}
-                className="bg-yellow-600 px-2 py-1 rounded flex-1 hover:bg-yellow-700"
+                className='bg-yellow-600 px-2 py-1 rounded flex-1 hover:bg-yellow-700'
               >
                 Clear
               </button>
               <button
                 onClick={deleteChatSession}
-                className="bg-red-600 px-2 py-1 rounded flex-1 hover:bg-red-700"
+                className='bg-red-600 px-2 py-1 rounded flex-1 hover:bg-red-700'
               >
                 Delete
               </button>
             </div>
           </div>
-          <ul className="overflow-y-auto max-h-[calc(100vh-12rem)]">
-            {sessions.map(session => (
+          <ul className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
+            {sessions.map((session) => (
               <li
                 key={session.id}
                 className={`p-2 cursor-pointer hover:bg-gray-700 ${
-                  session.id === currentSessionId ? 'bg-gray-600' : ''
+                  session.id === currentSessionId ? "bg-gray-600" : ""
                 }`}
                 onClick={() => selectSession(session.id)}
               >
-                <span className="text-sm">{session.name}</span>
+                <span className='text-sm'>{session.name}</span>
               </li>
             ))}
           </ul>
         </aside>
 
         {/* Main Chat Area */}
-        <main className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 overflow-y-auto bg-white">
+        <main className='flex-1 flex flex-col bg-gray-50'>
+          <div className='flex-1 p-4 overflow-y-auto space-y-4'>
             {chatWindow.map((msg, idx) => (
               <div
                 key={idx}
-                className={`mb-4 p-3 rounded ${
-                  msg.role === 'assistant'
-                    ? 'bg-blue-50 text-blue-900'
-                    : 'bg-gray-50 text-gray-900'
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="font-semibold mb-1">
-                  {msg.role === 'assistant' ? 'Assistant' : 'You'}:
+                <div
+                  className={`max-w-[60%] p-3 rounded-lg shadow ${
+                    msg.role === "assistant"
+                      ? "bg-blue-50 text-blue-900"
+                      : "bg-white text-gray-800"
+                  }`}
+                >
+                  <div className='font-semibold mb-1'>
+                    {msg.role === "assistant" ? "Assistant" : "You"}:
+                  </div>
+                  <div>{msg.content}</div>
                 </div>
-                <div>{msg.content}</div>
               </div>
             ))}
+            {assistantTyping && (
+              <div className='flex justify-start'>
+                <div className='max-w-[60%] p-3 rounded-lg shadow bg-blue-50 text-blue-900'>
+                  <div className='font-semibold mb-1'>Assistant</div>
+                  <TypingAnimation />
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex p-4 border-t bg-gray-50">
+          <div className='flex p-4 border-t bg-white'>
             <textarea
-              className="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Type your message here..."
+              className='flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+              placeholder='Type your message here...'
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   sendMessage();
                 }
@@ -391,10 +425,10 @@ const ChatUI = () => {
             />
             <button
               onClick={sendMessage}
-              className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className='ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors'
               disabled={!messageInput.trim()}
             >
-              Send
+              <i className='fas fa-paper-plane'></i> Send
             </button>
           </div>
         </main>
@@ -402,34 +436,34 @@ const ChatUI = () => {
 
       {/* Rename Modal */}
       {showRenameModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Rename Chat</h2>
+        <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
+          <div className='bg-white p-6 rounded-lg shadow-xl max-w-md w-full'>
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-xl font-bold'>Rename Chat</h2>
               <button
                 onClick={() => setShowRenameModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className='text-gray-500 hover:text-gray-700 text-2xl'
               >
-                ×
+                &times;
               </button>
             </div>
             <input
-              type="text"
+              type='text'
               value={newChatName}
               onChange={(e) => setNewChatName(e.target.value)}
-              className="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter new chat name"
+              className='w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
+              placeholder='Enter new chat name'
             />
-            <div className="flex justify-end gap-2">
+            <div className='flex justify-end gap-2'>
               <button
                 onClick={() => setShowRenameModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                className='px-4 py-2 text-gray-600 hover:text-gray-800'
               >
                 Cancel
               </button>
               <button
                 onClick={saveChatName}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
                 disabled={!newChatName.trim()}
               >
                 Save
