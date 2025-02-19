@@ -1,4 +1,5 @@
 # OdiaLingua: AI-Powered Odia Language Chatbot LLM 🌟
+![Logo](https://github.com/user-attachments/assets/d3a4c075-ad80-4564-b4eb-1aec11ad479f)
 
 ### ମୋ ଭାଷା, ମୋ ଗର୍ବ (My Language, My Pride)
 
