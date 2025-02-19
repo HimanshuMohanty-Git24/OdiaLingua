@@ -390,12 +390,10 @@ const ChatUI = () => {
       {/* Header with Logo, Chat Title and User Info */}
       <header className='w-full flex items-center justify-between bg-white shadow px-4 py-3'>
         <div className='flex items-center space-x-6'>
-            <Link to='/' className='flex items-center space-x-2' onClick={(e) => { e.preventDefault(); window.location.reload(); }}>
-            <span className='text-xl font-bold text-primary-dark'>
-              OdiaLingua
-            </span>
+          <Link to='/' className='flex items-center space-x-2'>
+            <span className='text-xl font-bold text-primary-dark'>OdiaLingua</span>
           </Link>
-          <div className='h-6 w-px bg-gray-300' /> {/* Divider */}
+          <div className='h-6 w-px bg-gray-300' />
           <div className='flex items-center space-x-4'>
             <h3 className='text-xl font-bold'>
               {sessions.find((s) => s.id === currentSessionId)?.name || "Chat"}
@@ -424,8 +422,8 @@ const ChatUI = () => {
           </button>
         </div>
       </header>
-
-      <div className='flex flex-1 relative'>
+  
+      <div className='flex flex-1 relative overflow-hidden'>
         {/* Sidebar Toggle Button when collapsed */}
         {isSidebarCollapsed && (
           <button
@@ -435,12 +433,12 @@ const ChatUI = () => {
             <GoSidebarExpand size={20} />
           </button>
         )}
-
+  
         {/* Sidebar for Sessions */}
         <aside
           className={`${
             isSidebarCollapsed ? "w-0 -ml-72" : "w-72"
-          } bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out`}
+          } bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out flex-shrink-0`}
         >
           <div className='mb-4 flex justify-between items-center'>
             <h2 className='text-xl font-bold'>Chats</h2>
@@ -485,9 +483,9 @@ const ChatUI = () => {
             ))}
           </ul>
         </aside>
-
+  
         {/* Main Chat Area */}
-        <main className='flex-1 flex flex-col bg-gray-50'>
+        <main className='flex-1 flex flex-col bg-gray-50 min-w-0'>
           <div className='flex-1 p-4 overflow-y-auto space-y-4'>
             {chatWindow.map((msg, idx) => (
               <div
@@ -497,7 +495,7 @@ const ChatUI = () => {
                 }`}
               >
                 <div
-                  className={`max-w-[60%] p-3 rounded-lg shadow ${
+                  className={`max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow ${
                     msg.role === "assistant"
                       ? "bg-blue-50 text-blue-900"
                       : "bg-white text-gray-800"
@@ -506,7 +504,7 @@ const ChatUI = () => {
                   <div className='font-semibold mb-1'>
                     {msg.role === "assistant" ? "Assistant" : "You"}
                   </div>
-                  <div>{msg.content}</div>
+                  <div className='break-words whitespace-pre-wrap'>{msg.content}</div>
                   {msg.role === "assistant" && (
                     <div className='flex items-center gap-2 mt-2'>
                       <button
@@ -532,7 +530,7 @@ const ChatUI = () => {
             ))}
             {assistantTyping && (
               <div className='flex justify-start'>
-                <div className='max-w-[60%] p-3 rounded-lg shadow bg-blue-50 text-blue-900'>
+                <div className='max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow bg-blue-50 text-blue-900'>
                   <div className='font-semibold mb-1'>Assistant</div>
                   <TypingAnimation />
                 </div>
@@ -541,7 +539,7 @@ const ChatUI = () => {
           </div>
           <div className='flex p-4 border-t bg-white'>
             <textarea
-              className='flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+              className='flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-w-0'
               placeholder='Type your message here...'
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
@@ -555,7 +553,7 @@ const ChatUI = () => {
             />
             <button
               onClick={sendMessage}
-              className='ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors'
+              className='ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex-shrink-0'
               disabled={!messageInput.trim()}
             >
               <i className='fas fa-paper-plane'></i> Send
@@ -563,7 +561,7 @@ const ChatUI = () => {
           </div>
         </main>
       </div>
-
+  
       {/* Rename Modal */}
       {showRenameModal && (
         <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
