@@ -184,17 +184,36 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className='p-6 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition-all duration-300 hover:shadow-lg'
+                className='p-6 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition-all duration-500 
+    hover:shadow-[0_0_30px_rgba(155,135,245,0.15)] relative group overflow-hidden
+    before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary/5 before:to-transparent 
+    before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100'
               >
-                <div className='w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4'>
-                  <div className='text-primary-dark'>{feature.icon}</div>
+                <div className='relative z-10'>
+                  <div
+                    className='w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4
+      transition-transform duration-500 group-hover:scale-110 group-hover:shadow-lg'
+                  >
+                    <div
+                      className='text-primary-dark transition-colors duration-500 
+        group-hover:text-primary group-hover:transform group-hover:scale-110'
+                    >
+                      {feature.icon}
+                    </div>
+                  </div>
+                  <h3
+                    className='text-lg md:text-xl font-semibold text-neutral-900 mb-2 
+      transition-colors duration-500 group-hover:text-primary-dark'
+                  >
+                    {feature.title}
+                  </h3>
+                  <p
+                    className='text-sm md:text-base text-neutral-800 transition-colors duration-500 
+      group-hover:text-neutral-900'
+                  >
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className='text-lg md:text-xl font-semibold text-neutral-900 mb-2'>
-                  {feature.title}
-                </h3>
-                <p className='text-sm md:text-base text-neutral-800'>
-                  {feature.description}
-                </p>
               </motion.div>
             ))}
           </div>
