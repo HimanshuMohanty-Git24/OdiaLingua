@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaVolumeUp, FaVolumeMute, FaCopy } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
+import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
+import { Link } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant";
@@ -24,6 +26,7 @@ const ChatUI = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [chatWindow, setChatWindow] = useState<Message[]>([]);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newChatName, setNewChatName] = useState("");
@@ -134,16 +137,16 @@ const ChatUI = () => {
           audioElements[messageId].currentTime = 0;
           delete audioElements[messageId];
         }
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        setIsPlaying((prev) => ({ ...prev, [messageId]: false }));
         return;
       }
-  
+
       // Clean up previous audio element
       if (audioElements[messageId]) {
         audioElements[messageId].pause();
         delete audioElements[messageId];
       }
-  
+
       const response = await fetch(`${API_BASE_URL}/text-to-speech`, {
         method: "POST",
         headers: {
@@ -151,44 +154,43 @@ const ChatUI = () => {
         },
         body: JSON.stringify({ text }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`TTS request failed: ${response.status}`);
       }
-  
+
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
-  
+
       // Set up audio event handlers
       audio.onerror = (e) => {
         console.error("Audio playback error:", e);
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        setIsPlaying((prev) => ({ ...prev, [messageId]: false }));
         toast.error("Audio playback failed");
       };
-  
+
       audio.onended = () => {
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        setIsPlaying((prev) => ({ ...prev, [messageId]: false }));
         URL.revokeObjectURL(audioUrl); // Clean up the URL
         delete audioElements[messageId];
       };
-  
+
       // Store the audio element and start playing
-      setAudioElements(prev => ({ ...prev, [messageId]: audio }));
-      setIsPlaying(prev => ({ ...prev, [messageId]: true }));
-      
+      setAudioElements((prev) => ({ ...prev, [messageId]: audio }));
+      setIsPlaying((prev) => ({ ...prev, [messageId]: true }));
+
       try {
         await audio.play();
       } catch (playError) {
         console.error("Playback error:", playError);
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        setIsPlaying((prev) => ({ ...prev, [messageId]: false }));
         toast.error("Failed to play audio");
       }
-  
     } catch (error) {
       console.error("TTS error:", error);
       toast.error("Failed to generate audio");
-      setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+      setIsPlaying((prev) => ({ ...prev, [messageId]: false }));
     }
   };
 
@@ -385,18 +387,26 @@ const ChatUI = () => {
 
   return (
     <div className='flex h-screen flex-col'>
-      {/* Header with Chat Title and User Info */}
+      {/* Header with Logo, Chat Title and User Info */}
       <header className='w-full flex items-center justify-between bg-white shadow px-4 py-3'>
-        <div className='flex items-center space-x-4'>
-          <h3 className='text-xl font-bold'>
-            {sessions.find((s) => s.id === currentSessionId)?.name || "Chat"}
-          </h3>
-          <button
-            onClick={openRenameModal}
-            className='text-sm text-blue-600 hover:underline'
-          >
-            Rename
-          </button>
+        <div className='flex items-center space-x-6'>
+            <Link to='/' className='flex items-center space-x-2' onClick={(e) => { e.preventDefault(); window.location.reload(); }}>
+            <span className='text-xl font-bold text-primary-dark'>
+              OdiaLingua
+            </span>
+          </Link>
+          <div className='h-6 w-px bg-gray-300' /> {/* Divider */}
+          <div className='flex items-center space-x-4'>
+            <h3 className='text-xl font-bold'>
+              {sessions.find((s) => s.id === currentSessionId)?.name || "Chat"}
+            </h3>
+            <button
+              onClick={openRenameModal}
+              className='text-sm text-blue-600 hover:underline'
+            >
+              Rename
+            </button>
+          </div>
         </div>
         <div className='flex items-center space-x-4'>
           <span className='text-sm text-gray-800'>
@@ -415,33 +425,53 @@ const ChatUI = () => {
         </div>
       </header>
 
-      <div className='flex flex-1'>
+      <div className='flex flex-1 relative'>
+        {/* Sidebar Toggle Button when collapsed */}
+        {isSidebarCollapsed && (
+          <button
+            onClick={() => setIsSidebarCollapsed(false)}
+            className='absolute left-0 top-4 z-10 p-2 bg-gray-800 text-white rounded-r-lg hover:bg-gray-700'
+          >
+            <GoSidebarExpand size={20} />
+          </button>
+        )}
+
         {/* Sidebar for Sessions */}
-        <aside className='w-72 bg-gray-800 text-white p-4'>
-          <div className='mb-4'>
+        <aside
+          className={`${
+            isSidebarCollapsed ? "w-0 -ml-72" : "w-72"
+          } bg-gray-800 text-white p-4 transition-all duration-300 ease-in-out`}
+        >
+          <div className='mb-4 flex justify-between items-center'>
             <h2 className='text-xl font-bold'>Chats</h2>
-            <div className='flex gap-2 mt-2'>
-              <button
-                onClick={createNewSession}
-                className='bg-green-600 px-2 py-1 rounded flex-1 hover:bg-green-700'
-              >
-                + New Chat
-              </button>
-              <button
-                onClick={clearChatHistory}
-                className='bg-yellow-600 px-2 py-1 rounded flex-1 hover:bg-yellow-700'
-              >
-                Clear
-              </button>
-              <button
-                onClick={deleteChatSession}
-                className='bg-red-600 px-2 py-1 rounded flex-1 hover:bg-red-700'
-              >
-                Delete
-              </button>
-            </div>
+            <button
+              onClick={() => setIsSidebarCollapsed(true)}
+              className='p-1 hover:bg-gray-700 rounded'
+            >
+              <GoSidebarCollapse size={20} />
+            </button>
           </div>
-          <ul className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
+          <div className='flex gap-2 mt-2'>
+            <button
+              onClick={createNewSession}
+              className='bg-green-600 px-2 py-1 rounded flex-1 hover:bg-green-700'
+            >
+              + New Chat
+            </button>
+            <button
+              onClick={clearChatHistory}
+              className='bg-yellow-600 px-2 py-1 rounded flex-1 hover:bg-yellow-700'
+            >
+              Clear
+            </button>
+            <button
+              onClick={deleteChatSession}
+              className='bg-red-600 px-2 py-1 rounded flex-1 hover:bg-red-700'
+            >
+              Delete
+            </button>
+          </div>
+          <ul className='overflow-y-auto max-h-[calc(100vh-10rem)] mt-4'>
             {sessions.map((session) => (
               <li
                 key={session.id}
