@@ -387,11 +387,13 @@ const ChatUI = () => {
 
   return (
     <div className='flex h-screen flex-col'>
-      {/* Header with Logo, Chat Title and User Info */}
+      {/* Header with Logo and Navigation */}
       <header className='w-full flex items-center justify-between bg-white shadow px-4 py-3'>
         <div className='flex items-center space-x-6'>
           <Link to='/' className='flex items-center space-x-2'>
-            <span className='text-xl font-bold text-primary-dark'>OdiaLingua</span>
+            <span className='text-xl font-bold text-primary-dark'>
+              OdiaLingua
+            </span>
           </Link>
           <div className='h-6 w-px bg-gray-300' />
           <div className='flex items-center space-x-4'>
@@ -422,19 +424,20 @@ const ChatUI = () => {
           </button>
         </div>
       </header>
-  
+
+      {/* Main Content Area */}
       <div className='flex flex-1 relative overflow-hidden'>
-        {/* Sidebar Toggle Button when collapsed */}
+        {/* Sidebar Toggle Button */}
         {isSidebarCollapsed && (
           <button
             onClick={() => setIsSidebarCollapsed(false)}
-            className='absolute left-0 top-4 z-10 p-2 bg-gray-800 text-white rounded-r-lg hover:bg-gray-700'
+            className='absolute left-2 top-4 z-10 p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 shadow-lg'
           >
             <GoSidebarExpand size={20} />
           </button>
         )}
-  
-        {/* Sidebar for Sessions */}
+
+        {/* Sidebar */}
         <aside
           className={`${
             isSidebarCollapsed ? "w-0 -ml-72" : "w-72"
@@ -483,89 +486,99 @@ const ChatUI = () => {
             ))}
           </ul>
         </aside>
-  
+
         {/* Main Chat Area */}
-        <main className='flex-1 flex flex-col bg-gray-50 min-w-0'>
-          <div className='flex-1 p-4 overflow-y-auto space-y-4'>
-            {chatWindow.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+        <main className='flex-1 flex flex-col bg-gray-50 min-w-0 relative'>
+          <div className='flex-1 overflow-y-auto'>
+            <div className='container mx-auto max-w-5xl px-4 py-4 space-y-4'>
+              {chatWindow.map((msg, idx) => (
                 <div
-                  className={`max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow ${
-                    msg.role === "assistant"
-                      ? "bg-blue-50 text-blue-900"
-                      : "bg-white text-gray-800"
+                  key={idx}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div className='font-semibold mb-1'>
-                    {msg.role === "assistant" ? "Assistant" : "You"}
-                  </div>
-                  <div className='break-words whitespace-pre-wrap'>{msg.content}</div>
-                  {msg.role === "assistant" && (
-                    <div className='flex items-center gap-2 mt-2'>
-                      <button
-                        onClick={() => playTTS(msg.content, `msg-${idx}`)}
-                        className='p-1 hover:bg-blue-100 rounded'
-                      >
-                        {isPlaying[`msg-${idx}`] ? (
-                          <FaVolumeMute size={16} />
-                        ) : (
-                          <FaVolumeUp size={16} />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => copyText(msg.content)}
-                        className='p-1 hover:bg-blue-100 rounded'
-                      >
-                        <FaCopy size={16} />
-                      </button>
+                  <div
+                    className={`w-full max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow ${
+                      msg.role === "assistant"
+                        ? "bg-blue-50 text-blue-900"
+                        : "bg-white text-gray-800"
+                    }`}
+                  >
+                    <div className='font-semibold mb-1'>
+                      {msg.role === "assistant" ? "Assistant" : "You"}
                     </div>
-                  )}
+                    <div className='break-words whitespace-pre-wrap'>
+                      {msg.content}
+                    </div>
+                    {msg.role === "assistant" && (
+                      <div className='flex items-center gap-2 mt-2'>
+                        <button
+                          onClick={() => playTTS(msg.content, `msg-${idx}`)}
+                          className='p-1 hover:bg-blue-100 rounded'
+                        >
+                          {isPlaying[`msg-${idx}`] ? (
+                            <FaVolumeMute size={16} />
+                          ) : (
+                            <FaVolumeUp size={16} />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => copyText(msg.content)}
+                          className='p-1 hover:bg-blue-100 rounded'
+                        >
+                          <FaCopy size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {assistantTyping && (
-              <div className='flex justify-start'>
-                <div className='max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow bg-blue-50 text-blue-900'>
-                  <div className='font-semibold mb-1'>Assistant</div>
-                  <TypingAnimation />
+              ))}
+              {assistantTyping && (
+                <div className='flex justify-start'>
+                  <div className='w-full max-w-[85%] md:max-w-[75%] lg:max-w-[60%] p-3 rounded-lg shadow bg-blue-50 text-blue-900'>
+                    <div className='font-semibold mb-1'>Assistant</div>
+                    <TypingAnimation />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-          <div className='flex p-4 border-t bg-white'>
-            <textarea
-              className='flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-w-0'
-              placeholder='Type your message here...'
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-              rows={2}
-            />
-            <button
-              onClick={sendMessage}
-              className='ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex-shrink-0'
-              disabled={!messageInput.trim()}
-            >
-              <i className='fas fa-paper-plane'></i> Send
-            </button>
+
+          {/* Input Area */}
+          <div className='border-t bg-white'>
+            <div className='container mx-auto max-w-5xl px-4 py-4'>
+              <div className='flex gap-2'>
+                <textarea
+                  className='flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-w-0'
+                  placeholder='Type your message here...'
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  rows={2}
+                />
+                <button
+                  onClick={sendMessage}
+                  className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
+                  disabled={!messageInput.trim()}
+                >
+                  Send
+                </button>
+              </div>
+            </div>
           </div>
         </main>
       </div>
-  
+
       {/* Rename Modal */}
       {showRenameModal && (
-        <div className='fixed inset-0 flex items-center justify-center bg-black/50'>
-          <div className='bg-white p-6 rounded-lg shadow-xl max-w-md w-full'>
+        <div className='fixed inset-0 flex items-center justify-center bg-black/50 z-50'>
+          <div className='bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4'>
             <div className='flex justify-between items-center mb-4'>
               <h2 className='text-xl font-bold'>Rename Chat</h2>
               <button
@@ -591,7 +604,7 @@ const ChatUI = () => {
               </button>
               <button
                 onClick={saveChatName}
-                className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600'
+                className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50'
                 disabled={!newChatName.trim()}
               >
                 Save
