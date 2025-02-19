@@ -32,34 +32,43 @@ app.add_middleware(
 sessions = {}
 
 # Pydantic models
+
+
 class SessionCreateResponse(BaseModel):
     status: str
     session_id: str
+
 
 class ChatMessage(BaseModel):
     role: str
     content: str
 
+
 class StreamChatRequest(BaseModel):
     session_id: str
     messages: list[ChatMessage]
+
 
 class StreamChatResponse(BaseModel):
     status: str
     response: str
 
+
 class ClearHistoryRequest(BaseModel):
     session_id: str
+
 
 class ClearHistoryResponse(BaseModel):
     status: str
     message: str
 
+
 # Initialize clients
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
-groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec")
 groq_client = Groq(api_key=GROQ_API_KEY)
+
 
 def search_serpapi(query: str) -> Optional[str]:
     """Search using SerpAPI (Google)"""
@@ -73,7 +82,8 @@ def search_serpapi(query: str) -> Optional[str]:
             "gl": "in",
             "safe": "active"
         }
-        response = requests.get("https://serpapi.com/search.json", params=params, timeout=10)
+        response = requests.get(
+            "https://serpapi.com/search.json", params=params, timeout=10)
         if response.status_code == 200:
             data = response.json()
             organic_results = data.get("organic_results", [])
@@ -89,6 +99,7 @@ def search_serpapi(query: str) -> Optional[str]:
         print(f"SerpAPI error: {str(e)}")
         return None
 
+
 def search_duckduckgo(query: str) -> Optional[str]:
     """Search using DuckDuckGo"""
     try:
@@ -103,6 +114,7 @@ def search_duckduckgo(query: str) -> Optional[str]:
     except Exception as e:
         print(f"DuckDuckGo error: {str(e)}")
         return None
+
 
 def search_combined(query: str) -> str:
     """Combined search using SerpAPI and DuckDuckGo"""
@@ -120,25 +132,26 @@ def search_combined(query: str) -> str:
         return ddg_results
     return "No search results available."
 
+
 def build_system_prompt(search_results: str) -> str:
     prompt = (
-        "You are OdiaLingua, the first Odia Chatbot made by Himanshu Mohanty.\n"
-        "ଆପଣ ଏକ ଓଡ଼ିଆ ଭାଷା ବାର୍ତ୍ତାଳାପ AI ସହାୟକ।\n"
-        "ନିମ୍ନଲିଖିତ ନିର୍ଦ୍ଦେଶାବଳୀ ଅନୁସରଣ କରନ୍ତୁ:\n\n"
-        "1. ଉତ୍ତର ସଂକ୍ଷିପ୍ତ ଏବଂ ସଠିକ ହେବା ଉଚିତ।\n"
-        "2. ଉତ୍ତର ୨-୩ ବାକ୍ୟରେ ସମାପ୍ତ ହେବା ଆବଶ୍ୟକ।\n"
-        "3. ଅସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତର ଦିଅନ୍ତୁ ନାହିଁ।\n"
-        "4. ପ୍ରତ୍ୟେକ ବାକ୍ୟ ପୂର୍ଣ୍ଣ ହେବା ଆବଶ୍ୟକ।\n"
-        "5. ଇଂରାଜୀ ଶବ୍ଦ (ଯେପରି AI, ML, ChatGPT) ହିଁ ରହିବା ଉଚିତ।\n\n"
+        "You are OdiaLingua, an advanced Odia language AI assistant created by Himanshu Mohanty.\n"
+        "ଆପଣ ଏକ ଉନ୍ନତ ଓଡ଼ିଆ ଭାଷା AI ସହାୟକ।\n\n"
+        "ନିର୍ଦ୍ଦେଶାବଳୀ:\n"
+        "1. ବିସ୍ତୃତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତର ଦିଅନ୍ତୁ।\n"
+        "2. ପ୍ରତ୍ୟେକ ଉତ୍ତର ଅତି କମରେ ୪-୫ ବାକ୍ୟ ହେବା ଆବଶ୍ୟକ।\n"
+        "3. ବିଷୟ ବସ୍ତୁକୁ ବିସ୍ତୃତ ଭାବରେ ବର୍ଣ୍ଣନା କରନ୍ତୁ।\n"
+        "4. ଇଂରାଜୀ ଶବ୍ଦ ଯଥା ସ୍ଥାନରେ ବ୍ୟବହାର କରନ୍ତୁ।\n"
+        "5. ଉତ୍ତର ଶେଷରେ ଏକ ସାରାଂଶ ଦିଅନ୍ତୁ।\n"
+        "6. ଯଦି ପ୍ରଶ୍ନର ଉତ୍ତର ଜଣା ନାହିଁ, ତେବେ ସେ ବିଷୟରେ ସ୍ପଷ୍ଟ କରନ୍ତୁ।\n\n"
         "ସାମ୍ପ୍ରତିକ ତଥ୍ୟ:\n"
         "===================\n"
         f"{search_results}\n"
         "===================\n"
-        "ମନେ ରଖନ୍ତୁ: ପ୍ରତ୍ୟେକ ଉତ୍ତର ଏକ ପୂର୍ଣ୍ଣଛେଦ (।) ସହ ଶେଷ ହେବା ଉଚିତ।"
+        "ମନେ ରଖନ୍ତୁ: ସବୁ ଉତ୍ତର ବିସ୍ତୃତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ହେବା ଆବଶ୍ୟକ।"
     )
-    print("\n=== System Prompt ===")
-    print(prompt)
     return prompt
+
 
 @app.post("/create-session", response_model=SessionCreateResponse)
 async def create_session():
@@ -146,71 +159,73 @@ async def create_session():
     sessions[session_id] = {"messages": []}
     return SessionCreateResponse(status="success", session_id=session_id)
 
+
 @app.post("/stream-chat", response_model=StreamChatResponse)
 async def stream_chat(request: StreamChatRequest):
     try:
         session_id = request.session_id
         if session_id not in sessions:
             raise HTTPException(status_code=404, detail="Session not found")
-        
+
         # Get user's message and update session
         latest_message = request.messages[-1].dict()
         user_latest = latest_message["content"]
-        
+
         print("\n=== New Chat Request ===")
         print(f"Session ID: {session_id}")
         print(f"User Message: {user_latest}")
-        
+
         # Perform search and build prompt
         search_results = search_combined(user_latest)
         system_prompt = build_system_prompt(search_results)
-        
+
         # Build conversation history
         conversation = [{"role": "system", "content": system_prompt}]
         conversation.extend(sessions[session_id]["messages"])
         conversation.append(latest_message)
-        
+
         print("\n=== Request to Groq ===")
         print(json.dumps(conversation, ensure_ascii=False, indent=2))
-        
+
         try:
             chat_completion = groq_client.chat.completions.create(
                 messages=conversation,
                 model=groq_model,
                 max_tokens=8192,
-                temperature=0.5,
+                temperature=0.7,  # Increased for more creative responses
                 top_p=0.9,
-                stop=["।", "\n"],
-                presence_penalty=0.1,
-                frequency_penalty=0.1,
+                stop=None,  # Removed the stops to allow longer responses
+                presence_penalty=0.3,  # Increased to encourage more diverse content
+                frequency_penalty=0.3,  # Increased to reduce repetition
             )
-            assistant_response = chat_completion.choices[0].message.content.strip()
-            
+            assistant_response = chat_completion.choices[0].message.content.strip(
+            )
+
             print(f"\n{assistant_response}\n")
             # Instead of throwing an exception, use a fallback message if response is too short.
             if len(assistant_response) < 20:
                 assistant_response = "I'm sorry, I couldn't generate a proper response."
-            
+
             print("\n=== Response Details ===")
             print(f"Response length: {len(assistant_response)} characters")
             print(f"Response: {assistant_response}")
-            
+
             # Append both the user message and the assistant reply
             sessions[session_id]["messages"].append(latest_message)
             sessions[session_id]["messages"].append({
-                "role": "assistant", 
+                "role": "assistant",
                 "content": assistant_response
             })
-            
+
             return StreamChatResponse(status="success", response=assistant_response)
-            
+
         except Exception as e:
             print(f"\n=== Groq API Error ===\n{str(e)}")
             raise HTTPException(
-                status_code=500, 
+                status_code=500,
                 detail=f"Error generating response: {str(e)}"
             )
-            
+
     except HTTPException as he:
         raise he
     except Exception as e:
