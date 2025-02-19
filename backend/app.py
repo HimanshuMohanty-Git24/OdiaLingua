@@ -170,6 +170,9 @@ def build_system_prompt(search_results: str) -> str:
         "===================\n"
         f"{search_results}\n"
         "===================\n"
+        "Use the search result only if necessary or you don't know the information.\n"
+        "Always give the answer in concise and complete form.\n"
+        "Always give summarized answers within 2-3 sentences.\n"
         "ମନେ ରଖନ୍ତୁ: ସବୁ ଉତ୍ତର ବିସ୍ତୃତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ହେବା ଆବଶ୍ୟକ।"
     )
     return prompt
@@ -224,6 +227,7 @@ async def stream_chat(request: StreamChatRequest):
 
             assistant_response = chat_completion.choices[0].message.content.strip(
             )
+            print(f"Assistant Response: {assistant_response}")
 
             # Validate response length and content
             if len(assistant_response) < 50:  # Minimum response length
