@@ -379,8 +379,16 @@ const ChatUI = () => {
 
   if (isLoading) {
     return (
-      <div className='flex items-center justify-center h-screen'>
-        Loading...
+      <div className='flex flex-col items-center justify-center h-screen bg-gray-50'>
+        <div className='mb-8'>
+          <h1 className='text-2xl font-bold text-gray-800 text-center'>OdiaLingua</h1>
+        </div>
+        <div className='flex space-x-3'>
+          <div className='h-4 w-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]'></div>
+          <div className='h-4 w-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]'></div>
+          <div className='h-4 w-4 bg-blue-600 rounded-full animate-bounce'></div>
+        </div>
+        <p className='mt-4 text-gray-600 text-sm'>Initializing chat...</p>
       </div>
     );
   }
