@@ -9,6 +9,17 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from duckduckgo_search import DDGS
 from groq import Groq
+from transformers import VitsModel, AutoTokenizer
+import torch
+import io
+from fastapi.responses import StreamingResponse
+import scipy.io.wavfile
+import numpy as np
+from fastapi import FastAPI, HTTPException, Request, Response
+
+# Initialize TTS model and tokenizer
+tts_model = None
+tts_tokenizer = None
 
 load_dotenv()
 
@@ -32,6 +43,10 @@ app.add_middleware(
 sessions = {}
 
 # Pydantic models
+
+
+class TTSRequest(BaseModel):
+    text: str
 
 
 class SessionCreateResponse(BaseModel):
@@ -68,6 +83,13 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec")
 groq_client = Groq(api_key=GROQ_API_KEY)
+
+
+def initialize_tts():
+    global tts_model, tts_tokenizer
+    if tts_model is None:
+        tts_model = VitsModel.from_pretrained("facebook/mms-tts-ory")
+        tts_tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-ory")
 
 
 def search_serpapi(query: str) -> Optional[str]:
@@ -179,38 +201,38 @@ async def stream_chat(request: StreamChatRequest):
         search_results = search_combined(user_latest)
         system_prompt = build_system_prompt(search_results)
 
-        # Build conversation history
+        # Build conversation history with explicit length handling
         conversation = [{"role": "system", "content": system_prompt}]
-        conversation.extend(sessions[session_id]["messages"])
-        conversation.append(latest_message)
 
-        print("\n=== Request to Groq ===")
-        print(json.dumps(conversation, ensure_ascii=False, indent=2))
+        # Only include last 10 messages to prevent context overflow
+        recent_messages = sessions[session_id]["messages"][-10:
+                                                           ] if sessions[session_id]["messages"] else []
+        conversation.extend(recent_messages)
+        conversation.append(latest_message)
 
         try:
             chat_completion = groq_client.chat.completions.create(
                 messages=conversation,
                 model=groq_model,
                 max_tokens=8192,
-                temperature=0.7,  # Increased for more creative responses
+                temperature=0.7,
                 top_p=0.9,
-                stop=None,  # Removed the stops to allow longer responses
-                presence_penalty=0.3,  # Increased to encourage more diverse content
-                frequency_penalty=0.3,  # Increased to reduce repetition
+                stop=None,
+                presence_penalty=0.3,
+                frequency_penalty=0.3,
             )
+
             assistant_response = chat_completion.choices[0].message.content.strip(
             )
 
-            print(f"\n{assistant_response}\n")
-            # Instead of throwing an exception, use a fallback message if response is too short.
-            if len(assistant_response) < 20:
-                assistant_response = "I'm sorry, I couldn't generate a proper response."
+            # Validate response length and content
+            if len(assistant_response) < 50:  # Minimum response length
+                assistant_response = (
+                    "ମୁଁ କ୍ଷମା ପ୍ରାର୍ଥନା କରୁଛି, ମୁଁ ଆପଣଙ୍କ ପ୍ରଶ୍ନର ଉତ୍ତର ଦେବାକୁ ଅସମର୍ଥ। "
+                    "ଦୟାକରି ପୁନଃ ପ୍ରଶ୍ନ କରନ୍ତୁ।"
+                )
 
-            print("\n=== Response Details ===")
-            print(f"Response length: {len(assistant_response)} characters")
-            print(f"Response: {assistant_response}")
-
-            # Append both the user message and the assistant reply
+            # Store messages in session
             sessions[session_id]["messages"].append(latest_message)
             sessions[session_id]["messages"].append({
                 "role": "assistant",
@@ -222,14 +244,62 @@ async def stream_chat(request: StreamChatRequest):
         except Exception as e:
             print(f"\n=== Groq API Error ===\n{str(e)}")
             raise HTTPException(
-                status_code=500,
-                detail=f"Error generating response: {str(e)}"
-            )
+                status_code=500, detail=f"Error generating response: {str(e)}")
 
-    except HTTPException as he:
-        raise he
     except Exception as e:
         print(f"\n=== Stream Chat Error ===\n{str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/text-to-speech")
+async def text_to_speech(request: TTSRequest):
+    try:
+        initialize_tts()
+        
+        # Preprocess text to ensure proper Odia handling
+        text = request.text.strip()
+        if not text:
+            raise HTTPException(status_code=400, detail="Empty text provided")
+
+        # Generate speech with proper error handling
+        try:
+            inputs = tts_tokenizer(text, return_tensors="pt")
+            
+            with torch.no_grad():
+                output = tts_model(**inputs).waveform
+
+            # Ensure proper audio format and sampling
+            audio_data = output.numpy().squeeze()
+            if len(audio_data.shape) != 1:
+                audio_data = audio_data.mean(axis=0)
+
+            # Convert to WAV format with proper sampling rate
+            buffer = io.BytesIO()
+            scipy.io.wavfile.write(
+                buffer, 
+                rate=tts_model.config.sampling_rate, 
+                data=audio_data.astype(np.float32)
+            )
+            buffer.seek(0)
+            
+            return StreamingResponse(
+                buffer, 
+                media_type="audio/wav",
+                headers={
+                    "Content-Type": "audio/wav",
+                    "Content-Disposition": "attachment;filename=speech.wav"
+                }
+            )
+        
+        except torch.cuda.OutOfMemoryError:
+            raise HTTPException(status_code=507, detail="GPU memory insufficient for TTS generation")
+        
+        except Exception as e:
+            print(f"TTS generation error: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to generate speech")
+    
+    except Exception as e:
+        print(f"TTS error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

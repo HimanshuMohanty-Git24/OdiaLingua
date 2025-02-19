@@ -1,8 +1,9 @@
 // src/components/ChatUI.tsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { getUser, logoutUser } from "@/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaVolumeUp, FaVolumeMute, FaCopy } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Message {
@@ -27,6 +28,10 @@ const ChatUI = () => {
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newChatName, setNewChatName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState<{ [key: string]: boolean }>({});
+  const [audioElements, setAudioElements] = useState<{
+    [key: string]: HTMLAudioElement;
+  }>({});
   const [assistantTyping, setAssistantTyping] = useState(false);
   const navigate = useNavigate();
 
@@ -120,6 +125,81 @@ const ChatUI = () => {
 
     fetchUser();
   }, [navigate, initializeSessions]);
+  const playTTS = async (text: string, messageId: string) => {
+    try {
+      if (isPlaying[messageId]) {
+        // Stop playing if already playing
+        if (audioElements[messageId]) {
+          audioElements[messageId].pause();
+          audioElements[messageId].currentTime = 0;
+          delete audioElements[messageId];
+        }
+        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        return;
+      }
+  
+      // Clean up previous audio element
+      if (audioElements[messageId]) {
+        audioElements[messageId].pause();
+        delete audioElements[messageId];
+      }
+  
+      const response = await fetch(`${API_BASE_URL}/text-to-speech`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`TTS request failed: ${response.status}`);
+      }
+  
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+  
+      // Set up audio event handlers
+      audio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        toast.error("Audio playback failed");
+      };
+  
+      audio.onended = () => {
+        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        URL.revokeObjectURL(audioUrl); // Clean up the URL
+        delete audioElements[messageId];
+      };
+  
+      // Store the audio element and start playing
+      setAudioElements(prev => ({ ...prev, [messageId]: audio }));
+      setIsPlaying(prev => ({ ...prev, [messageId]: true }));
+      
+      try {
+        await audio.play();
+      } catch (playError) {
+        console.error("Playback error:", playError);
+        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+        toast.error("Failed to play audio");
+      }
+  
+    } catch (error) {
+      console.error("TTS error:", error);
+      toast.error("Failed to generate audio");
+      setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+    }
+  };
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Text copied to clipboard");
+    } catch (error) {
+      toast.error("Failed to copy text");
+    }
+  };
 
   const sendMessage = async () => {
     if (!messageInput.trim() || !currentSessionId) {
@@ -273,12 +353,12 @@ const ChatUI = () => {
     setNewChatName(session.name);
     setShowRenameModal(true);
   };
-  
+
   const TypingAnimation = () => (
-    <div className="flex space-x-2">
-      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="h-2 w-2 bg-blue-600 rounded-full animate-bounce"></div>
+    <div className='flex space-x-2'>
+      <div className='h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]'></div>
+      <div className='h-2 w-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]'></div>
+      <div className='h-2 w-2 bg-blue-600 rounded-full animate-bounce'></div>
     </div>
   );
 
@@ -394,9 +474,29 @@ const ChatUI = () => {
                   }`}
                 >
                   <div className='font-semibold mb-1'>
-                    {msg.role === "assistant" ? "Assistant" : "You"}:
+                    {msg.role === "assistant" ? "Assistant" : "You"}
                   </div>
                   <div>{msg.content}</div>
+                  {msg.role === "assistant" && (
+                    <div className='flex items-center gap-2 mt-2'>
+                      <button
+                        onClick={() => playTTS(msg.content, `msg-${idx}`)}
+                        className='p-1 hover:bg-blue-100 rounded'
+                      >
+                        {isPlaying[`msg-${idx}`] ? (
+                          <FaVolumeMute size={16} />
+                        ) : (
+                          <FaVolumeUp size={16} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => copyText(msg.content)}
+                        className='p-1 hover:bg-blue-100 rounded'
+                      >
+                        <FaCopy size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
