@@ -1,65 +1,77 @@
-# OdiaLingua: AI-Powered Odia Language Chatbot LLM 🌟
+<div align="center">
+
+# OdiaLingua: AI-Powered Odia Language Assistant 🌟
+
 ![Logo](https://github.com/user-attachments/assets/d3a4c075-ad80-4564-b4eb-1aec11ad479f)
 
-### ମୋ ଭାଷା, ମୋ ଗର୍ବ (My Language, My Pride)
+### ମୋ ଭାଷା, ମୋ ଗର୍ବ 
+### (My Language, My Pride)
 
-Bridging Tradition with Technology—Speak, Learn, and Explore Odia with AI
+*Bridging Language Barriers with AI Technology*
+
+[Demo](#demo) • [Features](#features) • [Installation](#installation) • [Contributing](#contributing)
+
+</div>
+
+## 📖 Backstory
+
+Born from a simple experiment with Claude (Anthropic's LLM), OdiaLingua emerged from a vision to make complex information accessible to Odia speakers. Inspired by the groundbreaking work of the [OdiaGenAI.org](https://OdiaGenAI.org) community, who are pioneering Odia language model fine-tuning, I focused on developing the application layer to bridge the gap between advanced AI technology and everyday Odia users.
+
+What started as a Streamlit prototype has evolved into a full-stack application, aiming to break down language barriers and make information accessible to all Odia speakers, regardless of their technical expertise.
+
+## 🎥 Demo
+
+<div align="center">
+
+[![Demo Video](demo-thumbnail.png)](https://youtu.be/your-demo-link)
+
+*Click to watch the demo video*
+
+</div>
+
+## 📸 Screenshots
+
+<div align="center">
+
+![Chat Interface](screenshots/chat-interface.png)
+*Main Chat Interface with TTS Support*
+
+![User Dashboard](screenshots/dashboard.png)
+*User Dashboard and History*
+
+</div>
 
 ## 🎯 Project Overview
 
-OdiaLingua is an innovative AI-powered platform designed to preserve and promote the Odia language through modern technology. It combines advanced language models, real-time information retrieval, and text-to-speech capabilities to create an interactive and engaging learning experience.
+OdiaLingua is not just a language learning platform – it's a comprehensive solution for making information accessible to Odia speakers. The platform enables users to:
+- Ask complex questions and receive simple explanations in Odia
+- Access real-time information through integrated search capabilities
+- Utilize text-to-speech for better accessibility
+- Engage in natural conversations with AI in Odia
 
-### Why OdiaLingua?
+## 🛠️ Technology Stack
 
-- 🌍 Bridge the gap between traditional language learning and modern technology
-- 🗣️ Provide accessible Odia language learning tools for global learners
-- 🤖 Leverage AI to create natural, contextual conversations
-- 🔊 Offer authentic Odia pronunciation through advanced text-to-speech
-- 📚 Preserve and promote Odia linguistic heritage
+### Core Infrastructure
+- **LLM Provider**: Groq (hosting Llama-3.3-70b)
+  - Leverages Linear Processing Unit (LPU) technology for unprecedented inference speed
+  - Currently the fastest LLM inference platform available
+- **TTS Engine**: facebook/mms-tts-ory (hosted on Hugging Face)
+  - Specialized model for high-quality Odia speech synthesis
+- **Search Integration**: 
+  - DuckDuckGo API for real-time information
+  - SerpAPI for enhanced search capabilities
 
-## 🛠️ Tech Stack
+### Frontend Stack
+- **Core**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + Framer Motion
+- **State Management**: React Context + Zustand
+- **Authentication**: Appwrite
 
-### Frontend
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **Tailwind CSS** for styling
-- **Framer Motion** for animations
-- **React Router** for navigation
-- **Appwrite** for authentication
-- **React Icons & Lucide** for UI elements
-- **React Toastify** for notifications
-
-### Backend
-- **FastAPI** for high-performance API
-- **Groq** for LLM integration
-- **Hugging Face Transformers** for TTS
-- **DuckDuckGo Search** for real-time information
-- **SerpAPI** for enhanced search capabilities
-- **PyTorch** for ML operations
-- **VITS Model** for Odia text-to-speech
-
-## ✨ Features
-
-1. **AI-Powered Conversations**
-   - Natural language processing with Groq LLM
-   - Context-aware responses in Odia
-   - Real-time information integration
-
-2. **Text-to-Speech**
-   - Native Odia pronunciation
-   - High-quality speech synthesis
-   - Voice playback controls
-
-3. **User Experience**
-   - Modern, responsive interface
-   - Session management
-   - Chat history and organization
-   - Copy and share functionality
-
-4. **Authentication**
-   - Secure Google Sign-in
-   - Session persistence
-   - User profile management
+### Backend Stack
+- **API**: FastAPI
+- **ML Operations**: PyTorch
+- **Caching**: Redis
+- **Database**: PostgreSQL
 
 ## 🚀 Getting Started
 
@@ -103,9 +115,43 @@ SERPAPI_KEY=your_serpapi_key
 GROQ_MODEL=llama-3.3-70b-specdec
 ```
 
+## 🔮 Upcoming Features
+
+1. **Local LLM Support**
+   - Integration with Ollama for local LLM deployment
+   - Support for Odia fine-tuned models
+   
+2. **Enhanced Accessibility**
+   - Speech-to-Text (STT) implementation
+   - Improved UI
+   - Offline mode support
+
+3. **UI Enhancements**
+   - Advanced chat features
+   - Multi-modal support
+   - Better conversation management
+
+## ⚠️ Hosting Status
+
+Currently, OdiaLingua runs locally due to hosting constraints. The TTS model requires significant GPU resources, making free-tier cloud hosting impractical. As our favorite dev joke goes: "GPU poor, but spirits rich! 😅"
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+We welcome contributions! Here's how you can help:
+
+1. **Code Contributions**
+   - Fork the repository
+   - Create a feature branch
+   - Submit a pull request
+
+2. **Language Support**
+   - Help improve Odia translations
+   - Contribute to language model training
+
+3. **Documentation**
+   - Improve README
+   - Add code comments
+   - Create tutorials
 
 ## 📝 License
 
@@ -125,6 +171,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - SerpAPI for search integration
 - The Odia language community for inspiration and support
 
+<div align="center">
+
 ---
 
-Made with ❤️ for the Odia language community
+Made with ❤️ for the Odia community
+
+</div>
