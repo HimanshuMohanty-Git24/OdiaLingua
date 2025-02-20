@@ -23,9 +23,11 @@ What started as a Streamlit prototype has evolved into a full-stack application,
 
 <div align="center">
 
-[![Demo Video](demo-thumbnail.png)](https://youtu.be/your-demo-link)
 
-*Click to watch the demo video*
+
+https://github.com/user-attachments/assets/d0c1c462-cc77-4938-9bb2-1119fb8f9ca3
+
+
 
 </div>
 
@@ -33,12 +35,14 @@ What started as a Streamlit prototype has evolved into a full-stack application,
 
 <div align="center">
 
-![Chat Interface](screenshots/chat-interface.png)
+![Index](https://github.com/user-attachments/assets/5dfa2ccf-ae74-4c0a-88a0-ab74689c1558)
+*Home page of OdiaLingua*
+
+![Login](https://github.com/user-attachments/assets/8050b559-8a85-4e24-b1a7-7846bf64356a)
+*Login page of OdiaLingua*
+
+![ChatPage1](https://github.com/user-attachments/assets/1ef7bd5a-86be-40c9-8429-c284b10723d8)
 *Main Chat Interface with TTS Support*
-
-![User Dashboard](screenshots/dashboard.png)
-*User Dashboard and History*
-
 </div>
 
 ## 🎯 Project Overview
@@ -69,10 +73,8 @@ OdiaLingua is not just a language learning platform – it's a comprehensive sol
 
 ### Backend Stack
 - **API**: FastAPI
-- **ML Operations**: PyTorch
-- **Caching**: Redis
-- **Database**: PostgreSQL
-
+- **ML Operations**: Transformers
+  
 ## 🚀 Getting Started
 
 ### Prerequisites
