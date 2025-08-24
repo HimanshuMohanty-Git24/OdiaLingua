@@ -9,4 +9,5 @@ serpapi
 requests
 sarvamai
 appwrite
+googletrans
 google-search-results
