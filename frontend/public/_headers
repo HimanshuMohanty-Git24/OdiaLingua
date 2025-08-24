@@ -1,11 +1,17 @@
+/assets/*.js
+  Content-Type: application/javascript
+
+/assets/*.css
+  Content-Type: text/css
+
 /*.js
-  Content-Type: text/javascript
+  Content-Type: application/javascript
 
 /*.mjs  
-  Content-Type: text/javascript
+  Content-Type: application/javascript
 
 /*.ts
-  Content-Type: text/javascript
+  Content-Type: application/javascript
 
 /*.tsx
-  Content-Type: text/javascript
+  Content-Type: application/javascript
