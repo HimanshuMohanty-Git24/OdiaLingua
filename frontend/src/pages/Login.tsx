@@ -1,18 +1,83 @@
 // src/pages/Login.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { loginWithGoogle } from "@/auth";
+import { loginWithGoogle, getUser } from "@/auth";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const checkExistingAuth = async () => {
+      try {
+        const user = await getUser();
+        if (user) {
+          // User is already logged in, redirect to chat
+          navigate("/chat", { replace: true });
+          return;
+        }
+      } catch (error) {
+        // User is not authenticated, stay on login page
+        console.log("No existing authentication found");
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkExistingAuth();
+  }, [navigate]);
 
   const handleGoogleLogin = async () => {
-    await loginWithGoogle();
-    // In most cases, Appwrite will redirect automatically via the success URL.
-    // If needed, you can call navigate("/chat") here after checking user status.
+    if (isLoading) return; // Prevent multiple clicks
+
+    setIsLoading(true);
+    
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading("Redirecting to Google...");
+      
+      await loginWithGoogle();
+      
+      // Clear loading toast
+      toast.dismiss(loadingToast);
+      
+      // Note: Appwrite will handle the redirect automatically
+      // No need for manual navigation here as OAuth flow handles it
+      
+    } catch (error: any) {
+      console.error("Google login failed:", error);
+      
+      // Show error message to user
+      if (error.message) {
+        toast.error(`Login failed: ${error.message}`);
+      } else {
+        toast.error("Failed to sign in with Google. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  // Show loading spinner while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-50 to-neutral-100">
+        <div className="text-center">
+          <div className="flex space-x-3 justify-center mb-4">
+            <div className="h-4 w-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="h-4 w-4 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="h-4 w-4 bg-blue-600 rounded-full animate-bounce"></div>
+          </div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
@@ -22,6 +87,7 @@ const Login = () => {
           className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-10 animate-float"
           style={{ animationDelay: "2s" }}
         />
+        
         <nav className="flex justify-between items-center mb-16">
           <button
             onClick={() => navigate("/")}
@@ -30,6 +96,7 @@ const Login = () => {
             OdiaLingua
           </button>
         </nav>
+        
         <div className="max-w-md mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -43,31 +110,51 @@ const Login = () => {
             <p className="text-neutral-600 mb-6 md:mb-8 text-center text-sm md:text-base">
               Sign in with Google to start your Odia learning journey
             </p>
+            
             <Button
-              className="w-full bg-primary hover:bg-primary-dark transition-colors duration-300 flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary-dark transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
               onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Continue with Google
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  <span>Continue with Google</span>
+                </>
+              )}
             </Button>
+
+            {/* Debug info - remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600">
+                <p>Debug Info:</p>
+                <p>Endpoint: {import.meta.env.VITE_APPWRITE_ENDPOINT}</p>
+                <p>Project ID: {import.meta.env.VITE_APPWRITE_PROJECT_ID}</p>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

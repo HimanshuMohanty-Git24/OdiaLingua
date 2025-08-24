@@ -1,36 +1,32 @@
 import os
 import uuid
-import requests
-import json
-from typing import Optional
-from fastapi import FastAPI, HTTPException, Request
+import json  # Add this import
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from duckduckgo_search import DDGS
-from groq import Groq
-from transformers import VitsModel, AutoTokenizer
-import torch
-import io
-from fastapi.responses import StreamingResponse
-import scipy.io.wavfile
-import numpy as np
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import StreamingResponse, JSONResponse
+from appwrite.client import Client
+from appwrite.services.databases import Databases
+from appwrite.id import ID
+from appwrite.permission import Permission
+from appwrite.role import Role
+from langchain_core.messages import HumanMessage, AIMessage
 
-# Initialize TTS model and tokenizer
-tts_model = None
-tts_tokenizer = None
-
+# Load environment variables
 load_dotenv()
 
-app = FastAPI(title="OdiaLingua ChatBot Backend")
+# Local imports
+from graph import graph
+from services.tts_service import generate_odia_speech
 
-# Allow CORS
-origins = [
-    "http://localhost:5173",
-    "http://localhost:5000",
-    "http://localhost",
-]
+# Initialize FastAPI App
+app = FastAPI(title="OdiaLingua Agentic Backend")
+
+# CORS MIDDLEWARE
+origins_str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5000")
+origins = [origin.strip() for origin in origins_str.split(',')]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -39,288 +35,206 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory storage for sessions
-sessions = {}
+# Appwrite Client Initialization
+def get_appwrite_client():
+    client = Client()
+    client.set_endpoint(os.getenv("APPWRITE_ENDPOINT"))
+    client.set_project(os.getenv("APPWRITE_PROJECT_ID"))
+    client.set_key(os.getenv("APPWRITE_API_KEY"))
+    return client
 
-# Pydantic models
+def get_db(client: Client = Depends(get_appwrite_client)):
+    return Databases(client)
 
+# Pydantic Models for request bodies
+class ChatRequest(BaseModel):
+    session_id: str
+    message: str
+    user_id: str
 
 class TTSRequest(BaseModel):
     text: str
 
-
-class SessionCreateResponse(BaseModel):
-    status: str
+class SessionActionRequest(BaseModel):
     session_id: str
 
-
-class ChatMessage(BaseModel):
-    role: str
-    content: str
-
-
-class StreamChatRequest(BaseModel):
+class RenameRequest(BaseModel):
     session_id: str
-    messages: list[ChatMessage]
+    name: str
 
+# Helper functions
+def format_history(messages_list: list) -> list:
+    """Format message history for LangGraph"""
+    return [
+        HumanMessage(content=msg['content']) if msg['role'] == 'user'
+        else AIMessage(content=msg['content'])
+        for msg in messages_list
+    ]
 
-class StreamChatResponse(BaseModel):
-    status: str
-    response: str
-
-
-class ClearHistoryRequest(BaseModel):
-    session_id: str
-
-
-class ClearHistoryResponse(BaseModel):
-    status: str
-    message: str
-
-
-# Initialize clients
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-SERPAPI_KEY = os.getenv("SERPAPI_KEY")
-groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-specdec")
-groq_client = Groq(api_key=GROQ_API_KEY)
-
-
-def initialize_tts():
-    global tts_model, tts_tokenizer
-    if tts_model is None:
-        tts_model = VitsModel.from_pretrained("facebook/mms-tts-ory")
-        tts_tokenizer = AutoTokenizer.from_pretrained("facebook/mms-tts-ory")
-
-
-def search_serpapi(query: str) -> Optional[str]:
-    """Search using SerpAPI (Google)"""
+def serialize_messages(messages: list) -> str:
+    """Convert messages list to JSON string for storage"""
     try:
-        params = {
-            "api_key": SERPAPI_KEY,
-            "engine": "google",
-            "q": query,
-            "num": 5,
-            "hl": "en",
-            "gl": "in",
-            "safe": "active"
-        }
-        response = requests.get(
-            "https://serpapi.com/search.json", params=params, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            organic_results = data.get("organic_results", [])
-            if not organic_results:
-                return None
-            summary = ""
-            for i, result in enumerate(organic_results[:3], 1):
-                title = result.get("title", "")
-                snippet = result.get("snippet", "")
-                summary += f"{i}. {title}: {snippet}\n\n"
-            return summary.strip() if summary else None
+        return json.dumps(messages)
     except Exception as e:
-        print(f"SerpAPI error: {str(e)}")
-        return None
+        print(f"Error serializing messages: {e}")
+        return "[]"
 
-
-def search_duckduckgo(query: str) -> Optional[str]:
-    """Search using DuckDuckGo"""
+def deserialize_messages(messages_str: str) -> list:
+    """Convert JSON string back to messages list"""
     try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=3))
-            summary = ""
-            for i, result in enumerate(results, 1):
-                title = result.get("title", "")
-                snippet = result.get("body", "")
-                summary += f"{i}. {title}: {snippet}\n\n"
-            return summary[:500] if summary else None
+        if not messages_str:
+            return []
+        return json.loads(messages_str)
     except Exception as e:
-        print(f"DuckDuckGo error: {str(e)}")
-        return None
+        print(f"Error deserializing messages: {e}")
+        return []
 
+# --- API Endpoints ---
 
-def search_combined(query: str) -> str:
-    """Combined search using SerpAPI and DuckDuckGo"""
-    print("\n=== Search Query ===")
-    print(f"Searching for: {query}")
-    serp_results = search_serpapi(query)
-    if serp_results:
-        print("\n=== SerpAPI Results ===")
-        print(serp_results)
-        return serp_results
-    ddg_results = search_duckduckgo(query)
-    if ddg_results:
-        print("\n=== DuckDuckGo Results ===")
-        print(ddg_results)
-        return ddg_results
-    return "No search results available."
-
-
-def build_system_prompt(search_results: str) -> str:
-    prompt = (
-        "You are OdiaLingua, an advanced Odia language AI assistant created by Himanshu Mohanty.\n"
-        "ଆପଣ ଏକ ଉନ୍ନତ ଓଡ଼ିଆ ଭାଷା AI ସହାୟକ।\n\n"
-        "ନିର୍ଦ୍ଦେଶାବଳୀ:\n"
-        "1. ବିସ୍ତୃତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତର ଦିଅନ୍ତୁ।\n"
-        "2. ପ୍ରତ୍ୟେକ ଉତ୍ତର ଅତି କମରେ ୪-୫ ବାକ୍ୟ ହେବା ଆବଶ୍ୟକ।\n"
-        "3. ବିଷୟ ବସ୍ତୁକୁ ବିସ୍ତୃତ ଭାବରେ ବର୍ଣ୍ଣନା କରନ୍ତୁ।\n"
-        "4. ଇଂରାଜୀ ଶବ୍ଦ ଯଥା ସ୍ଥାନରେ ବ୍ୟବହାର କରନ୍ତୁ।\n"
-        "5. ଉତ୍ତର ଶେଷରେ ଏକ ସାରାଂଶ ଦିଅନ୍ତୁ।\n"
-        "6. ଯଦି ପ୍ରଶ୍ନର ଉତ୍ତର ଜଣା ନାହିଁ, ତେବେ ସେ ବିଷୟରେ ସ୍ପଷ୍ଟ କରନ୍ତୁ।\n\n"
-        "ସାମ୍ପ୍ରତିକ ତଥ୍ୟ:\n"
-        "===================\n"
-        f"{search_results}\n"
-        "===================\n"
-        "Use the search result only if necessary or you don't know the information.\n"
-        "Always give the answer in concise and complete form.\n"
-        "Always give summarized answers within 2-3 sentences.\n"
-        "ମନେ ରଖନ୍ତୁ: ସବୁ ଉତ୍ତର ବିସ୍ତୃତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ହେବା ଆବଶ୍ୟକ।"
-    )
-    return prompt
-
-
-@app.post("/create-session", response_model=SessionCreateResponse)
+@app.post("/create-session")
 async def create_session():
+    """Generates a new session ID for the frontend."""
     session_id = str(uuid.uuid4())
-    sessions[session_id] = {"messages": []}
-    return SessionCreateResponse(status="success", session_id=session_id)
+    return {"status": "success", "session_id": session_id}
 
+@app.post("/stream-chat")
+async def stream_chat(request: dict):
+    """Endpoint for session verification - returns success if session exists"""
+    return {"status": "success"}
 
-@app.post("/stream-chat", response_model=StreamChatResponse)
-async def stream_chat(request: StreamChatRequest):
+@app.post("/chat")
+async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
+    """Main chat endpoint that runs the agentic graph."""
+    session_id = request.session_id
+    user_id = request.user_id
+    user_message = request.message
+    
+    db_id = os.getenv("APPWRITE_DATABASE_ID")
+    collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+
     try:
-        session_id = request.session_id
-        if session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found")
-
-        # Get user's message and update session
-        latest_message = request.messages[-1].dict()
-        user_latest = latest_message["content"]
-
-        print("\n=== New Chat Request ===")
-        print(f"Session ID: {session_id}")
-        print(f"User Message: {user_latest}")
-
-        # Perform search and build prompt
-        search_results = search_combined(user_latest)
-        system_prompt = build_system_prompt(search_results)
-
-        # Build conversation history with explicit length handling
-        conversation = [{"role": "system", "content": system_prompt}]
-
-        # Only include last 10 messages to prevent context overflow
-        recent_messages = sessions[session_id]["messages"][-10:
-                                                           ] if sessions[session_id]["messages"] else []
-        conversation.extend(recent_messages)
-        conversation.append(latest_message)
-
-        try:
-            chat_completion = groq_client.chat.completions.create(
-                messages=conversation,
-                model=groq_model,
-                max_tokens=8192,
-                temperature=0.7,
-                top_p=0.9,
-                stop=None,
-                presence_penalty=0.3,
-                frequency_penalty=0.3,
-            )
-
-            assistant_response = chat_completion.choices[0].message.content.strip(
-            )
-            print(f"Assistant Response: {assistant_response}")
-
-            # Validate response length and content
-            if len(assistant_response) < 50:  # Minimum response length
-                assistant_response = (
-                    "ମୁଁ କ୍ଷମା ପ୍ରାର୍ଥନା କରୁଛି, ମୁଁ ଆପଣଙ୍କ ପ୍ରଶ୍ନର ଉତ୍ତର ଦେବାକୁ ଅସମର୍ଥ। "
-                    "ଦୟାକରି ପୁନଃ ପ୍ରଶ୍ନ କରନ୍ତୁ।"
-                )
-
-            # Store messages in session
-            sessions[session_id]["messages"].append(latest_message)
-            sessions[session_id]["messages"].append({
-                "role": "assistant",
-                "content": assistant_response
-            })
-
-            return StreamChatResponse(status="success", response=assistant_response)
-
-        except Exception as e:
-            print(f"\n=== Groq API Error ===\n{str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Error generating response: {str(e)}")
-
+        # Try to get existing document
+        doc = db.get_document(db_id, collection_id, session_id)
+        messages_str = doc.get('messages', '[]')
+        messages_history = deserialize_messages(messages_str)
     except Exception as e:
-        print(f"\n=== Stream Chat Error ===\n{str(e)}")
+        print(f"Document not found, creating new one: {e}")
+        # Create new document
+        doc_data = {
+            'userId': user_id, 
+            'sessionId': session_id, 
+            'name': 'New Chat', 
+            'messages': '[]'  # Store as JSON string
+        }
+        permissions = [
+            Permission.read(Role.user(user_id)), 
+            Permission.update(Role.user(user_id)), 
+            Permission.delete(Role.user(user_id))
+        ]
+        try:
+            db.create_document(db_id, collection_id, session_id, doc_data, permissions)
+            messages_history = []
+        except Exception as create_error:
+            print(f"Error creating document: {create_error}")
+            raise HTTPException(status_code=500, detail=f"Failed to create chat session: {str(create_error)}")
+
+    # Add user message
+    messages_history.append({"role": "user", "content": user_message})
+    
+    try:
+        # Process with AI
+        formatted_messages = format_history(messages_history)
+        initial_state = {"messages": formatted_messages, "next_agent": ""}
+        
+        final_state = await graph.ainvoke(initial_state)
+        assistant_response = final_state["messages"][-1].content
+
+        # Add assistant response
+        messages_history.append({"role": "assistant", "content": assistant_response})
+        
+        # Serialize and check length
+        messages_str = serialize_messages(messages_history)
+        
+        # Trim if too long (keep last 50 messages max to stay under 100k chars)
+        while len(messages_str) > 95000 and len(messages_history) > 2:
+            messages_history.pop(0)  # Remove oldest message
+            messages_str = serialize_messages(messages_history)
+        
+        # Update document
+        db.update_document(db_id, collection_id, session_id, {'messages': messages_str})
+        
+        return {"status": "success", "response": assistant_response}
+        
+    except Exception as e:
+        print(f"Error in chat processing: {e}")
+        raise HTTPException(status_code=500, detail=f"Chat processing failed: {str(e)}")
+
+@app.post("/clear-history")
+async def clear_history(request: SessionActionRequest, db: Databases = Depends(get_db)):
+    """Clears the message history for a given session."""
+    try:
+        db_id = os.getenv("APPWRITE_DATABASE_ID")
+        collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+        
+        # Check if document exists first
+        try:
+            db.get_document(db_id, collection_id, request.session_id)
+            # If it exists, update it
+            db.update_document(db_id, collection_id, request.session_id, {'messages': '[]'})
+            return {"status": "success", "message": "Chat history cleared"}
+        except:
+            # Document doesn't exist
+            raise HTTPException(status_code=404, detail="Session not found")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/delete-chat")
+async def delete_chat(request: SessionActionRequest, db: Databases = Depends(get_db)):
+    """Deletes a chat session document from the database."""
+    try:
+        db_id = os.getenv("APPWRITE_DATABASE_ID")
+        collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+        
+        db.delete_document(db_id, collection_id, request.session_id)
+        return {"status": "success", "message": "Chat session deleted"}
+    except Exception as e:
+        # If document doesn't exist, still return success
+        if "Document with the requested ID could not be found" in str(e):
+            return {"status": "success", "message": "Chat session already deleted"}
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/rename-chat")
+async def rename_chat(request: RenameRequest, db: Databases = Depends(get_db)):
+    """Renames a chat session."""
+    try:
+        db_id = os.getenv("APPWRITE_DATABASE_ID")
+        collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+        
+        db.update_document(db_id, collection_id, request.session_id, {'name': request.name})
+        return {"status": "success", "message": "Chat renamed"}
+    except Exception as e:
+        if "Document with the requested ID could not be found" in str(e):
+            raise HTTPException(status_code=404, detail="Session not found")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/text-to-speech")
 async def text_to_speech(request: TTSRequest):
+    """Generates speech using Sarvam AI TTS."""
     try:
-        initialize_tts()
-        
-        # Preprocess text to ensure proper Odia handling
         text = request.text.strip()
         if not text:
             raise HTTPException(status_code=400, detail="Empty text provided")
-
-        # Generate speech with proper error handling
-        try:
-            inputs = tts_tokenizer(text, return_tensors="pt")
-            
-            with torch.no_grad():
-                output = tts_model(**inputs).waveform
-
-            # Ensure proper audio format and sampling
-            audio_data = output.numpy().squeeze()
-            if len(audio_data.shape) != 1:
-                audio_data = audio_data.mean(axis=0)
-
-            # Convert to WAV format with proper sampling rate
-            buffer = io.BytesIO()
-            scipy.io.wavfile.write(
-                buffer, 
-                rate=tts_model.config.sampling_rate, 
-                data=audio_data.astype(np.float32)
-            )
-            buffer.seek(0)
-            
-            return StreamingResponse(
-                buffer, 
-                media_type="audio/wav",
-                headers={
-                    "Content-Type": "audio/wav",
-                    "Content-Disposition": "attachment;filename=speech.wav"
-                }
-            )
         
-        except torch.cuda.OutOfMemoryError:
-            raise HTTPException(status_code=507, detail="GPU memory insufficient for TTS generation")
+        audio_content = await generate_odia_speech(text)
         
-        except Exception as e:
-            print(f"TTS generation error: {str(e)}")
-            raise HTTPException(status_code=500, detail="Failed to generate speech")
-    
+        return StreamingResponse(iter([audio_content]), media_type="audio/wav")
     except Exception as e:
-        print(f"TTS error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.post("/clear-history", response_model=ClearHistoryResponse)
-async def clear_history(request: ClearHistoryRequest):
-    try:
-        session_id = request.session_id
-        if session_id not in sessions:
-            raise HTTPException(status_code=404, detail="Session not found")
-        sessions[session_id]["messages"] = []
-        return ClearHistoryResponse(status="success", message="Chat history cleared successfully")
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        print(f"Clear history error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
+# Main entry point
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True)

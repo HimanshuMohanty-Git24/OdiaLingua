@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "appwrite": "^17.0.0",
     "class-variance-authority": "^0.7.1",
     "embla-carousel-react": "^8.5.2",
@@ -16,7 +18,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.3.0",
+    "react-syntax-highlighter": "^15.6.3",
     "react-toastify": "^11.0.3",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"

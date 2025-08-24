@@ -1,7 +1,12 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 pydantic
-groq
 langchain
+langchain-groq
+langgraph
+serpapi
 requests
+sarvamai
+appwrite
+google-search-results

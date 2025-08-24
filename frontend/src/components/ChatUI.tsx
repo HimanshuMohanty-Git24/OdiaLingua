@@ -7,6 +7,9 @@ import { FaVolumeUp, FaVolumeMute, FaCopy } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { Link } from "react-router-dom";
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface Message {
   role: "user" | "assistant";
@@ -20,6 +23,73 @@ interface Session {
 }
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+// Custom components for ReactMarkdown with Odia-friendly styling
+const MarkdownComponents = {
+  // Paragraphs with proper spacing
+  p: ({ children }: any) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+  
+  // Bold text - more prominent for Odia text
+  strong: ({ children }: any) => <strong className="font-bold text-blue-800">{children}</strong>,
+  
+  // Italic text
+  em: ({ children }: any) => <em className="italic text-blue-700">{children}</em>,
+  
+  // Code blocks with syntax highlighting
+  code: ({ node, inline, className, children, ...props }: any) => {
+    const match = /language-(\w+)/.exec(className || '');
+    return !inline && match ? (
+      <SyntaxHighlighter
+        style={tomorrow}
+        language={match[1]}
+        PreTag="div"
+        className="rounded-md text-sm my-2"
+        {...props}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    ) : (
+      <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-red-600" {...props}>
+        {children}
+      </code>
+    );
+  },
+  
+  // Lists with proper spacing
+  ul: ({ children }: any) => <ul className="list-disc list-inside mb-2 space-y-1 ml-2">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal list-inside mb-2 space-y-1 ml-2">{children}</ol>,
+  li: ({ children }: any) => <li className="ml-2">{children}</li>,
+  
+  // Links with external opening
+  a: ({ href, children }: any) => (
+    <a href={href} className="text-blue-600 hover:underline hover:text-blue-800" target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
+  
+  // Blockquotes
+  blockquote: ({ children }: any) => (
+    <blockquote className="border-l-4 border-blue-200 pl-4 italic text-blue-700 mb-2 bg-blue-50 py-2 rounded-r">
+      {children}
+    </blockquote>
+  ),
+  
+  // Headers with proper hierarchy
+  h1: ({ children }: any) => <h1 className="text-xl font-bold mb-2 text-blue-900 border-b border-blue-200 pb-1">{children}</h1>,
+  h2: ({ children }: any) => <h2 className="text-lg font-bold mb-2 text-blue-900">{children}</h2>,
+  h3: ({ children }: any) => <h3 className="text-base font-bold mb-1 text-blue-900">{children}</h3>,
+  
+  // Tables
+  table: ({ children }: any) => <table className="border-collapse border border-gray-300 mb-2 w-full">{children}</table>,
+  thead: ({ children }: any) => <thead className="bg-gray-100">{children}</thead>,
+  tbody: ({ children }: any) => <tbody>{children}</tbody>,
+  tr: ({ children }: any) => <tr className="border border-gray-300">{children}</tr>,
+  td: ({ children }: any) => <td className="border border-gray-300 px-2 py-1">{children}</td>,
+  th: ({ children }: any) => <th className="border border-gray-300 px-2 py-1 font-semibold">{children}</th>,
+  
+  // Horizontal rule
+  hr: () => <hr className="border-gray-300 my-4" />,
+};
 
 const ChatUI = () => {
   const [user, setUser] = useState<any>(null);
@@ -128,6 +198,7 @@ const ChatUI = () => {
 
     fetchUser();
   }, [navigate, initializeSessions]);
+
   const playTTS = async (text: string, messageId: string) => {
     try {
       if (isPlaying[messageId]) {
@@ -216,16 +287,15 @@ const ChatUI = () => {
     setAssistantTyping(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/stream-chat`, {
+      const res = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           session_id: currentSessionId,
-          messages: [userMessage],
+          message: messageInput.trim(),
+          user_id: user?.$id,
         }),
       });
 
@@ -516,9 +586,16 @@ const ChatUI = () => {
                     <div className='font-semibold mb-1'>
                       {msg.role === "assistant" ? "Assistant" : "You"}
                     </div>
-                    <div className='break-words whitespace-pre-wrap'>
-                      {msg.content}
+                    
+                    {/* Updated content rendering with ReactMarkdown */}
+                    <div className='break-words prose prose-sm max-w-none prose-blue'>
+                      <ReactMarkdown 
+                        components={MarkdownComponents}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
+                    
                     {msg.role === "assistant" && (
                       <div className='flex items-center gap-2 mt-2'>
                         <button

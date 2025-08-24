@@ -1,5 +1,5 @@
 
-import type { Config } from "tailwindcss";
+// import { Config } from "tailwindcss"; // Only needed in TypeScript files
 
 export default {
   darkMode: ["class"],
@@ -67,5 +67,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [require("tailwindcss-animate"), require('@tailwindcss/typography')],
+};
