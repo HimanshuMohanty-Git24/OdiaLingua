@@ -73,6 +73,10 @@ def format_history(messages_list: list) -> list:
     ]
 
 # --- API Endpoints ---
+@app.get("/")
+async def root():
+    """A simple health check endpoint."""
+    return {"status": "ok", "message": "OdiaLingua Agentic Backend is running."}
 
 @app.get("/chats/{user_id}")
 async def get_user_chats(user_id: str, db: Databases = Depends(get_db)):
