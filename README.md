@@ -27,7 +27,11 @@ What started as a prototype has now evolved into a full-stack, deployed applicat
 
 *A video demonstrating the chat interface, real-time search, and TTS functionality.*
 
-https://github.com/user-attachments/assets/d0c1c462-cc77-4938-9bb2-1119fb8f9ca3
+
+
+https://github.com/user-attachments/assets/3484bf29-b11c-4b5c-911f-bfdf8166b6a1
+
+
 
 </div>
 
@@ -193,3 +197,4 @@ The Odia language community for inspiration and support.
 Made with ❤️ for the Odia community
 
 </div>
+
