@@ -148,13 +148,13 @@ const Login = () => {
             </Button>
 
             {/* Debug info - remove in production */}
-            {process.env.NODE_ENV === 'development' && (
+            {/* {process.env.NODE_ENV === 'development' && (
               <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600">
                 <p>Debug Info:</p>
                 <p>Endpoint: {import.meta.env.VITE_APPWRITE_ENDPOINT}</p>
                 <p>Project ID: {import.meta.env.VITE_APPWRITE_PROJECT_ID}</p>
               </div>
-            )}
+            )} */}
           </motion.div>
         </div>
       </div>
