@@ -7,27 +7,27 @@
 ### ମୋ ଭାଷା, ମୋ ଗର୍ବ 
 ### (My Language, My Pride)
 
-*Bridging Language Barriers with AI Technology*
+*Bridging Language Barriers with an Advanced Agentic AI System*
 
-[Demo](#demo) • [Features](#features) • [Installation](#installation) • [Contributing](#contributing)
+**[🚀 Live Demo: odialingua.netlify.app](https://odialingua.netlify.app/)**
+
+[Features](#features) • [Agentic Architecture](#-agentic-architecture) • [Technology Stack](#️-technology-stack) • [Installation](#-getting-started)
 
 </div>
 
 ## 📖 Backstory
 
-Born from a simple experiment with Claude (Anthropic's LLM), OdiaLingua emerged from a vision to make complex information accessible to Odia speakers. Inspired by the groundbreaking work of the [OdiaGenAI.org](https://OdiaGenAI.org) community, who are pioneering Odia language model fine-tuning, I focused on developing the application layer to bridge the gap between advanced AI technology and everyday Odia users.
+Born from a simple experiment with LLMs, OdiaLingua emerged from a vision to make complex information accessible to Odia speakers. Inspired by the groundbreaking work of the [OdiaGenAI.org](https://OdiaGenAI.org) community, who are pioneering Odia language model fine-tuning, I focused on developing the application layer to bridge the gap between advanced AI technology and everyday Odia users.
 
-What started as a Streamlit prototype has evolved into a full-stack application, aiming to break down language barriers and make information accessible to all Odia speakers, regardless of their technical expertise.
+What started as a prototype has now evolved into a full-stack, deployed application powered by a sophisticated **agentic system**. This architecture allows for intelligent task delegation, ensuring that user queries are handled by specialized AI agents for maximum accuracy and efficiency. This project aims to break down language barriers and make information accessible to all Odia speakers, regardless of their technical expertise.
 
 ## 🎥 Demo
 
 <div align="center">
 
-
+*A video demonstrating the chat interface, real-time search, and TTS functionality.*
 
 https://github.com/user-attachments/assets/d0c1c462-cc77-4938-9bb2-1119fb8f9ca3
-
-
 
 </div>
 
@@ -45,44 +45,63 @@ https://github.com/user-attachments/assets/d0c1c462-cc77-4938-9bb2-1119fb8f9ca3
 *Main Chat Interface with TTS Support*
 </div>
 
-## 🎯 Project Overview
+## ✨ Features
 
-OdiaLingua is not just a language learning platform – it's a comprehensive solution for making information accessible to Odia speakers. The platform enables users to:
-- Ask complex questions and receive simple explanations in Odia
-- Access real-time information through integrated search capabilities
-- Utilize text-to-speech for better accessibility
-- Engage in natural conversations with AI in Odia
+OdiaLingua is a comprehensive solution for making information accessible to Odia speakers. The platform enables users to:
+-   **Ask complex questions** and receive simple, accurate explanations in Odia.
+-   Access **real-time information** through an intelligent, multi-tool search system.
+-   Utilize high-quality **text-to-speech** for better accessibility.
+-   Engage in **natural, conversational chat**.
+-   **Persistent chat history** tied to your user account.
+-   **Automatic, intelligent chat titling** for easy conversation management.
+
+## 🧠 Agentic Architecture
+
+The backend has been completely refactored from a monolithic script into a scalable and modular **multi-agent system** using **LangGraph**. This is a significant upgrade that makes the application smarter and more maintainable.
+
+### Why an Agentic System?
+Instead of a single LLM trying to handle every task, our system uses a **Query Router** (a supervisor agent) to delegate tasks to specialized agents. This is more efficient and reliable. For example, a question about the weather is routed directly to a `Weather Agent` with a weather tool, while a factual question goes to a `Research Agent`.
+
+### Our Team of AI Agents:
+1.  **Query Router (Supervisor):** The entry point. It analyzes user queries and decides which specialist agent should handle the task.
+2.  **Research Agent:** The fact-finder. It uses multiple search tools (like Google AI Overview) to gather and verify real-time information, ensuring answers about current events are accurate.
+3.  **Weather Agent:** The meteorologist. It uses the OpenWeatherMap API to provide up-to-date weather forecasts.
+4.  **Response Synthesizer:** The final communicator. It takes the data from other agents and crafts a coherent, natural-sounding response, with a strict rule to **always reply in Odia**.
+5.  **Title Agent:** A utility agent that automatically generates a short, descriptive title in Odia for each new conversation based on the initial query.
+
+This modular design is highly scalable. New capabilities (like a code-writing agent) can be added simply by creating a new agent and tool, without disrupting the existing logic.
 
 ## 🛠️ Technology Stack
 
 ### Core Infrastructure
-- **LLM Provider**: Groq (hosting Llama-3.3-70b)
-  - Leverages Linear Processing Unit (LPU) technology for unprecedented inference speed
-  - Currently the fastest LLM inference platform available
-- **TTS Engine**: facebook/mms-tts-ory (hosted on Hugging Face)
-  - Specialized model for high-quality Odia speech synthesis
-- **Search Integration**: 
-  - DuckDuckGo API for real-time information
-  - SerpAPI for enhanced search capabilities
+-   **LLM Provider**: **Groq** (hosting models like Llama 3 and GPT-OSS).
+    -   Leverages Linear Processing Unit (LPU) technology for unparalleled inference speed.
+-   **Agentic Framework**: **LangGraph**
+    -   Orchestrates the flow of tasks between different AI agents and tools.
+-   **TTS Engine**: **Sarvam AI (Bulbul-v2)**
+    -   A high-quality, cloud-based API for natural-sounding Odia speech synthesis. This replaced the previous self-hosted model, which was too GPU-intensive for deployment.
+-   **Search Integration**:
+    -   **SerpApi**: Provides access to Google AI Overview and standard search results for the Research Agent.
+    -   **OpenWeatherMap API**: Powers the Weather Agent.
 
 ### Frontend Stack
-- **Core**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + Framer Motion
-- **State Management**: React Context + Zustand
-- **Authentication**: Appwrite
+-   **Core**: React 18 + TypeScript + Vite
+-   **Styling**: Tailwind CSS
+-   **Routing & UI**: React Router, Radix UI, Framer Motion
+-   **Authentication & User Management**: Appwrite
 
 ### Backend Stack
-- **API**: FastAPI
-- **ML Operations**: Transformers
-  
+-   **API**: FastAPI
+-   **Database**: Appwrite Databases (for persistent, user-specific chat history)
+-   **Deployment**: Render
+
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+
-- Python 3.8+
-- Appwrite instance
-- Groq API key
-- SerpAPI key
+-   Node.js 18+
+-   Python 3.10+
+-   An Appwrite instance (Cloud or self-hosted)
+-   API keys for Groq, SerpApi, OpenWeatherMap, and Sarvam AI.
 
 ### Frontend Setup
 ```bash
@@ -90,92 +109,86 @@ cd frontend
 npm install
 npm run dev
 ```
-
 ### Backend Setup
-```bash
+```Bash
 cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-python app.py
+uvicorn app:app --reload --port 5000
 ```
-
 ### Environment Variables
-Create `.env` files in both frontend and backend directories:
-
-Frontend `.env`:
-```env
+Create .env files in both frontend and backend directories.
+Frontend (frontend/.env):
+```Env
+VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
 VITE_APPWRITE_PROJECT_ID=your_project_id
-VITE_APPWRITE_ENDPOINT=your_endpoint
+VITE_APPWRITE_REDIRECT_SUCCESS=http://localhost:5173/chat
+VITE_APPWRITE_REDIRECT_FAILURE=http://localhost:5173/login
 VITE_BACKEND_URL=http://localhost:5000
 ```
-
-Backend `.env`:
-```env
-GROQ_API_KEY=your_groq_api_key
-SERPAPI_KEY=your_serpapi_key
-GROQ_MODEL=llama-3.3-70b-specdec
+Backend (backend/.env):
+```Env
+GROQ_API_KEY="your_groq_api_key"
+GROQ_MODEL="llama3-70b-8192"
+SERPAPI_API_KEY="your_serpapi_key"
+OPENWEATHERMAP_API_KEY="your_openweathermap_key"
+SARVAM_API_KEY="your_sarvam_api_key"
+SARVAM_TTS_LANG_CODE="od-IN"
+APPWRITE_ENDPOINT="https://cloud.appwrite.io/v1"
+APPWRITE_PROJECT_ID="your_project_id"
+APPWRITE_API_KEY="your_appwrite_server_key"
+APPWRITE_DATABASE_ID="your_database_id"
+APPWRITE_COLLECTION_ID="your_collection_id"
+CORS_ORIGINS="http://localhost:5173,http://localhost:5000"
 ```
+### ✅ Hosting Status
+OdiaLingua is now live!
 
-## 🔮 Upcoming Features
+- Frontend: Deployed on Netlify.
 
-1. **Local LLM Support**
-   - Integration with Ollama for local LLM deployment
-   - Support for Odia fine-tuned models
-   
-2. **Enhanced Accessibility**
-   - Speech-to-Text (STT) implementation
-   - Improved UI
-   - Offline mode support
+- Backend: Deployed on Render.
 
-3. **UI Enhancements**
-   - Advanced chat features
-   - Multi-modal support
-   - Better conversation management
+The initial challenge of hosting a GPU-intensive TTS model was solved by migrating to the Sarvam AI API. This change made the backend lightweight and deployable on standard cloud infrastructure, allowing the project to be publicly accessible.
 
-## ⚠️ Hosting Status
-
-Currently, OdiaLingua runs locally due to hosting constraints. The TTS model requires significant GPU resources, making free-tier cloud hosting impractical. As our favorite dev joke goes: "GPU poor, but spirits rich! 😅"
-
-## 🤝 Contributing
+### 🤝 Contributing
 
 We welcome contributions! Here's how you can help:
 
-1. **Code Contributions**
-   - Fork the repository
-   - Create a feature branch
-   - Submit a pull request
+Code Contributions: Fork the repository, create a feature branch, and submit a pull request.
 
-2. **Language Support**
-   - Help improve Odia translations
-   - Contribute to language model training
+Language Support: Help improve Odia translations and suggest new features.
 
-3. **Documentation**
-   - Improve README
-   - Add code comments
-   - Create tutorials
+Documentation: Improve the README, add code comments, or create tutorials.
 
-## 📝 License
+### 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👨‍💻 Author
+### 👨‍💻 Author
 
-**Himanshu Mohanty**
-- GitHub: [@HimanshuMohanty-Git24](https://github.com/HimanshuMohanty-Git24)
-- Portfolio: [himanshumohanty.netlify.app](https://himanshumohanty.netlify.app)
-- LinkedIn: [himanshumohanty](https://www.linkedin.com/in/himanshumohanty)
+Himanshu Mohanty
 
-## 🙏 Acknowledgments
+GitHub: @HimanshuMohanty-Git24
 
-- Groq for providing the LLM capabilities
-- Hugging Face for the VITS model
-- SerpAPI for search integration
-- The Odia language community for inspiration and support
+Portfolio: https://hima.codes/
+
+LinkedIn: himanshumohanty
+
+### 🙏 Acknowledgments
+
+Groq for providing the high-speed LLM capabilities.
+
+Sarvam AI for the excellent Odia TTS API.
+
+SerpApi and OpenWeatherMap for providing real-time data tools.
+
+Appwrite for simplifying authentication and database management.
+
+The Odia language community for inspiration and support.
 
 <div align="center">
 
----
 
 Made with ❤️ for the Odia community
 
