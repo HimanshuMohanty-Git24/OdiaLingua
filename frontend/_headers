@@ -1,0 +1,14 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'
+
+/*.js
+  Content-Type: text/javascript
+
+/*.mjs  
+  Content-Type: text/javascript
+
+/*.ts
+  Content-Type: text/javascript
+
+/*.tsx
+  Content-Type: text/javascript
