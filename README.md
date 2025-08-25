@@ -19,9 +19,9 @@
 <!-- Status Badges -->
 <p>
   <img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fodialingua.netlify.app" />
-  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/HimanshuMohanty-Git24/OdiaLinguaFrontend" />
-  <img alt="GitHub issues" src="https://img.shields.io/github/issues/HimanshuMohanty-Git24/OdiaLinguaFrontend" />
-  <img alt="GitHub stars" src="https://img.shields.io/github/stars/HimanshuMohanty-Git24/OdiaLinguaFrontend" />
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/HimanshuMohanty-Git24/OdiaLingua" />
+  <img alt="GitHub issues" src="https://img.shields.io/github/issues/HimanshuMohanty-Git24/OdiaLingua" />
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/HimanshuMohanty-Git24/OdiaLingua" />
 </p>
 
 ### ମୋ ଭାଷା, ମୋ ଗର୍ବ 
@@ -283,8 +283,8 @@ Instead of a monolithic LLM handling everything, our **LangGraph-powered multi-a
 
 ```bash
 # Clone the repository
-git clone https://github.com/HimanshuMohanty-Git24/OdiaLinguaFrontend.git
-cd OdiaLinguaFrontend
+git clone https://github.com/HimanshuMohanty-Git24/OdiaLingua.git
+cd OdiaLingua
 
 # Install dependencies
 npm install
@@ -330,7 +330,7 @@ npm run dev
 
 ```bash
 # 1. Navigate to project directory
-cd OdiaLinguaFrontend
+cd OdiaLingua
 
 # 2. Install dependencies
 npm ci  # Use ci for production-like install
@@ -539,12 +539,6 @@ We welcome contributions from developers, linguists, and Odia language enthusias
 
 </details>
 
-### 🎖️ Contributors
-
-<div align="center">
-
-[![Contributors](https://contrib.rocks/image?repo=HimanshuMohanty-Git24/OdiaLinguaFrontend)](https://github.com/HimanshuMohanty-Git24/OdiaLinguaFrontend/graphs/contributors)
-
 </div>
 
 ---
@@ -609,7 +603,7 @@ We welcome contributions from developers, linguists, and Odia language enthusias
 
 ### 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=HimanshuMohanty-Git24/OdiaLinguaFrontend&type=Date)](https://star-history.com/#HimanshuMohanty-Git24/OdiaLinguaFrontend&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=HimanshuMohanty-Git24/OdiaLingua&type=Date)](https://star-history.com/#HimanshuMohanty-Git24/OdiaLingua&Date)
 
 ---
 
