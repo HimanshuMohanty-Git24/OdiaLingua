@@ -1,0 +1,78 @@
+# robots.txt for OdiaLingua
+# https://odialingua.netlify.app/robots.txt
+
+User-agent: *
+Allow: /
+
+# Important pages to crawl
+Allow: /
+Allow: /contact
+Allow: /login
+Allow: /chat
+
+# Block sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /static/
+Disallow: *.json$
+
+# Block Netlify build artifacts
+Disallow: /.netlify/
+Disallow: /functions/
+Disallow: /_redirects
+Disallow: /_headers
+
+# Block common spam/attack paths
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /administrator/
+Disallow: /xmlrpc.php
+
+# Crawl delay (optional - adjust as needed)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://odialingua.netlify.app/sitemap.xml
+Sitemap: https://odialingua.netlify.app/sitemap-index.xml
+
+# Google-specific directives
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing-specific directives
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+# Social media crawlers
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+# Archive crawlers
+User-agent: ia_archiver
+Allow: /
+
+# Mobile crawlers
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Block bad bots
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+# Add your domain here
+Host: odialingua.netlify.app
