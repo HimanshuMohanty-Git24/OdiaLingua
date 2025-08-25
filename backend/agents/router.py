@@ -25,49 +25,78 @@ class RouteQuery(BaseModel):
 
 structured_router = llm.with_structured_output(RouteQuery)
 
-# ── Fixed routing prompt with proper escaping ────────────────────────────────────────────
+# ── Enhanced multi-language routing prompt ────────────────────────────────────────────
 router_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             f"""
 You are a high-precision routing agent for an Odia AI assistant that MUST be factually accurate.
+You can understand queries in multiple languages and scripts but always route based on intent.
+
+LANGUAGE SUPPORT:
+• Odia in Odia script: "ଓଡ଼ିଶାର ବର୍ତ୍ତମାନର ମୁଖ୍ୟମନ୍ତ୍ରୀ କିଏ?"
+• Odia in English script (romanized): "Odisha ra bartaman mukhyamantri kie?"
+• Hinglish/Hindi-English mix: "Odisha ka CM kaun hai?" or "Odisha ke CM kon he?"
+• Pure English: "Who is the CM of Odisha?"
+
+UNDERSTAND THESE EQUIVALENT TERMS ACROSS LANGUAGES:
+• CM/Chief Minister: "ମୁଖ୍ୟମନ୍ତ୍ରୀ", "mukhyamantri", "CM", "chief minister"
+• Current/Now: "ବର୍ତ୍ତମାନ", "bartaman", "current", "abhi", "ab"
+• Who: "କିଏ", "kie", "kaun", "kon", "who"
+• Weather: "ପାଗ", "paaga", "mausam", "weather"
+• What: "କଣ", "kana", "kya", "what"
+• Where: "କେଉଁଠି", "keunthi", "kahan", "where"
+• When: "କେବେ", "kebe", "kab", "when"
+• How: "କିପରି", "kipari", "kaise", "how"
+• Today: "ଆଜି", "aaji", "aaj", "today"
+• Tomorrow: "କାଲି", "kaali", "kal", "tomorrow"
+• Day After Tomorrow: "ପରେ କାଲି", "pare kaali", "par kal", "day after tomorrow"
+• Yesterday: "ଗତକାଲି", "gatakaali", "kal", "yesterday"
 
 Current date: {datetime.utcnow().date()} (Use this for "current" questions)
 
 ROUTING RULES:
-• "weather" → Any weather/temperature/forecast questions:
-    - "What is the weather like in Bhubaneswar?"
-    - "Will it rain tomorrow?"
-    - "What's the temperature in Cuttack?"
-    - "Is it going to be sunny this week?"
-    - "Will it be humid in Puri?"
-    - "What will the weather be like next weekend?"
-• "research" → Questions that need verified current facts, including:
-  - Current office holders (CM, PM, President, Ministers, etc.)  
-  - Recent appointments or changes in leadership
+• "weather" → Any weather/temperature/forecast questions in ANY language:
+    - "ଭୁବନେଶ୍ୱରରେ ପାଗ କେମିତି ଅଛି?" (Odia)
+    - "Bhubaneswar re paag kemiti achhi?" (Romanized Odia)
+    - "Bhubaneswar mein mausam kaisa hai?" (Hinglish)
+    - "What is the weather like in Bhubaneswar?" (English)
+    - Weather indicators: rain/barsha, hot/garmi, cold/thanda, sunny/dhoop
+
+• "research" → Questions needing verified current facts in ANY language:
+  - Current office holders: CM, PM, President, Ministers, MLAs, MPs
+  - Recent appointments or leadership changes
   - Current political party affiliations
-  - Recent events, news, or developments
-  - "Who is the current..." questions
-  - Questions about 2024 elections/results
-  - Any factual claim that could have changed recently
-  - Questions with words: "current", "latest", "now", "today", "2024", "2025"
-• "response" → Only for:
-  - General knowledge that doesn't change (history, definitions, explanations)
-  - Casual greetings and conversations
-  - Cultural questions
-  - How-to questions
-  - Creative requests (stories, poems)
+  - Recent events, news, developments
+  - Election results (2024, 2025)
+  - Examples across languages:
+    * "ଓଡ଼ିଶାର ବର୍ତ୍ତମାନର ମୁଖ୍ୟମନ୍ତ୍ରୀ କିଏ?" (Odia)
+    * "Odisha ra CM kie?" (Romanized Odia)
+    * "Odisha ka CM kaun hai?" (Hinglish)
+    * "Who is the current CM of Odisha?" (English)
+  - Keywords in any language: current/bartaman/abhi, latest/natun, now/ekhani, today/aaji/aaj
 
-CRITICAL: Political and administrative positions change frequently. 
-When in doubt about current facts, choose "research" to ensure accuracy.
+• "response" → Only for stable knowledge and casual chat:
+  - Historical facts that don't change
+  - General greetings: "namaskar", "hello", "kemiti achha"
+  - Cultural questions about Odisha
+  - Definitions and explanations
+  - Creative requests (stories/galpa, poems/kabita)
 
-EXAMPLES:
-❌ "Who is CM of Odisha?" → "response" (WRONG - this changes and needs research)
-✅ "Who is CM of Odisha?" → "research" (CORRECT - current position needs verification)
-✅ "What is the capital of Odisha?" → "response" (CORRECT - this doesn't change)
-✅ "How are you?" → "response" (CORRECT - casual conversation)
-✅ "Weather in Bhubaneswar?" → "weather" (CORRECT - weather query)
+CRITICAL POLITICAL TERMS TO RECOGNIZE:
+• BJP: "ବିଜେପି", "BJP", "Bharatiya Janata Party", "bhajapa"
+• BJD: "ବିଜଦ", "BJD", "Biju Janata Dal", "bijad"
+• Congress: "କଂଗ୍ରେସ", "Congress", "kaangress"
+• CM: "ସିଏମ", "ମୁଖ୍ୟମନ୍ତ୍ରୀ", "CM", "mukhyamantri", "chief minister"
+
+EXAMPLES WITH CORRECT ROUTING:
+✅ "Odisha ra CM kie?" → "research" (current position needs verification)
+✅ "ଓଡ଼ିଶାର ରାଜଧାନୀ କଣ?" → "response" (capital doesn't change)
+✅ "Bhubaneswar mein paani barsa raha hai?" → "weather" (weather query)
+✅ "Kemiti achha?" → "response" (casual greeting)
+
+SAFETY OVERRIDE: If uncertain between research/response for factual queries, choose "research".
 
 Return JSON with next_agent field containing your choice.
             """,
@@ -93,15 +122,26 @@ def get_route(state):
     print(f"--- ROUTER DECISION: {decision.next_agent} ---")
     print(f"📝 Query: {user_message[:50]}...")
     
-    # Additional safety check for common factual questions
-    factual_keywords = [
+    # Enhanced multi-language safety check for factual questions
+    factual_keywords_multilang = [
+        # English
         "current", "latest", "now", "today", "who is", "chief minister", 
-        "prime minister", "president", "2024", "2025", "elected", "appointed"
+        "prime minister", "president", "2024", "2025", "elected", "appointed",
+        # Odia romanized
+        "bartaman", "kie", "mukhyamantri", "aaji", "ekhani",
+        # Hinglish/Hindi
+        "kaun", "kon", "abhi", "aaj", "chief minister", "CM",
+        # Mixed terms
+        "odisha ra", "odisha ka", "odisha re"
     ]
     
-    if any(keyword in user_message.lower() for keyword in factual_keywords):
-        if decision.next_agent != "research" and "weather" not in user_message.lower():
-            print("🚨 SAFETY OVERRIDE: Factual keywords detected, forcing research")
+    if any(keyword.lower() in user_message.lower() for keyword in factual_keywords_multilang):
+        # Additional check for weather terms to avoid false positives
+        weather_terms = ["paag", "mausam", "weather", "barsha", "rain", "garmi", "hot", "thanda", "cold"]
+        is_weather = any(weather_term.lower() in user_message.lower() for weather_term in weather_terms)
+        
+        if decision.next_agent != "research" and not is_weather:
+            print("🚨 MULTILANG SAFETY OVERRIDE: Factual keywords detected, forcing research")
             decision.next_agent = "research"
     
     return {"next_agent": decision.next_agent}
