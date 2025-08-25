@@ -140,7 +140,7 @@
 ## 🧠 Agentic Architecture
 
 <div align="center">
-<img src="https://via.placeholder.com/800x400/6366f1/ffffff?text=Agentic+Architecture+Diagram+%28Coming+Soon%29" alt="Architecture Diagram" width="100%">
+<img width="282" height="531" alt="download (3)" src="https://github.com/user-attachments/assets/9d1412d8-67f3-4d65-bdc9-e256a077b09c" />
 </div>
 
 ### Why Agentic? 🤔
@@ -245,7 +245,11 @@ Instead of a monolithic LLM handling everything, our **LangGraph-powered multi-a
 > 
 > *A comprehensive walkthrough showcasing the chat interface, real-time search capabilities, TTS functionality, and mobile responsiveness.*
 
-[![OdiaLingua Demo](https://via.placeholder.com/800x450/6366f1/ffffff?text=🔹+Demo+Video+%28Coming+Soon%29)](https://placeholder-video-url.com)
+
+
+https://github.com/user-attachments/assets/2ec2e68b-e071-4ed6-9a79-727dfd79a65d
+
+
 
 </div>
 
@@ -254,22 +258,26 @@ Instead of a monolithic LLM handling everything, our **LangGraph-powered multi-a
 <div align="center">
 
 #### 🏠 Landing Page
-<img src="https://via.placeholder.com/800x500/f8fafc/64748b?text=🏠+Landing+Page+%28Updated+Soon%29" alt="Landing Page" width="100%">
+
+<img width="1357" height="621" alt="1landing page" src="https://github.com/user-attachments/assets/22688ceb-2801-494a-bbbc-d1274294ce8b" />
 
 *Modern, responsive homepage with animated hero section and feature highlights*
 
 #### 🔐 Authentication Flow  
-<img src="https://via.placeholder.com/800x500/f8fafc/64748b?text=🔐+Login+Page+%28Updated+Soon%29" alt="Login Page" width="100%">
+
+<img width="1352" height="625" alt="2loginpage" src="https://github.com/user-attachments/assets/740d9036-d867-4c8c-a732-bb0383954adb" />
 
 *Streamlined OAuth authentication with Google integration*
 
 #### 💬 Main Chat Interface
-<img src="https://via.placeholder.com/800x500/f8fafc/64748b?text=💬+Chat+Interface+%28Updated+Soon%29" alt="Chat Interface" width="100%">
+
+<img width="1361" height="636" alt="3chatinterface" src="https://github.com/user-attachments/assets/c2b60b9a-5355-4817-addb-a867495626bb" />
 
 *Intelligent chat with TTS, real-time responses, and conversation management*
 
 #### 📱 Mobile Experience
-<img src="https://via.placeholder.com/400x600/f8fafc/64748b?text=📱+Mobile+View+%28Updated+Soon%29" alt="Mobile View" width="50%">
+
+<img width="1170" height="2532" alt="4MobileView" src="https://github.com/user-attachments/assets/7cde745f-39e0-4814-a387-6698b2ff05a4" />
 
 *Fully responsive design optimized for mobile devices*
 
@@ -619,3 +627,5 @@ We welcome contributions from developers, linguists, and Odia language enthusias
 **⭐ Don't forget to star this repository if you found it helpful!**
 
 </div>
+
+
