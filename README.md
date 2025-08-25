@@ -245,7 +245,11 @@ Instead of a monolithic LLM handling everything, our **LangGraph-powered multi-a
 > 
 > *A comprehensive walkthrough showcasing the chat interface, real-time search capabilities, TTS functionality, and mobile responsiveness.*
 
-[![OdiaLingua Demo](https://via.placeholder.com/800x450/6366f1/ffffff?text=🔹+Demo+Video+%28Coming+Soon%29)](https://placeholder-video-url.com)
+
+
+https://github.com/user-attachments/assets/2ec2e68b-e071-4ed6-9a79-727dfd79a65d
+
+
 
 </div>
 
@@ -623,4 +627,5 @@ We welcome contributions from developers, linguists, and Odia language enthusias
 **⭐ Don't forget to star this repository if you found it helpful!**
 
 </div>
+
 
