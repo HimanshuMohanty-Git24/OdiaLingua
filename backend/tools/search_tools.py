@@ -3,6 +3,7 @@ from typing import List
 from langchain_core.tools import tool
 from googletrans import Translator           # pip install googletrans==4.0.0-rc1
 import serpapi  # New import style
+import asyncio
 
 # ── API keys ──────────────────────────────────────────────────────
 SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
@@ -22,7 +23,8 @@ def _ensure_english(q: str) -> str:
     """Translate to English if the query is not mostly Latin characters."""
     if re.fullmatch(r"[A-Za-z0-9 ,.'\"?%:-]+", q):
         return q
-    return translator.translate(q, dest="en").text
+    result = asyncio.run(translator.translate(q, dest="en"))
+    return result.text
 
 def _filter_recent(snips: List[str], yr_cutoff=2023) -> List[str]:
     out=[]
