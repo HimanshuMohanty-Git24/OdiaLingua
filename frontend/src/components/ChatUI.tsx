@@ -263,17 +263,17 @@ const TypingIndicator = () => (
   </motion.div>
 );
 
-// Professional Message Component
+// Enhanced Markdown Components
 const MessageComponent = React.memo(({ 
   message, 
   index, 
-  isPlaying, 
+  ttsState, // Changed from isPlaying to ttsState
   onPlayTTS, 
   onCopy 
 }: {
   message: Message;
   index: number;
-  isPlaying: boolean;
+  ttsState?: { isLoading: boolean; isPlaying: boolean }; // New type
   onPlayTTS: (text: string, id: string) => void;
   onCopy: (text: string) => void;
 }) => {
@@ -352,9 +352,12 @@ const MessageComponent = React.memo(({
                   size="sm"
                   variant="ghost"
                   onClick={() => onPlayTTS(message.content, messageId)}
+                  disabled={ttsState?.isLoading}
                   className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-muted"
                 >
-                  {isPlaying ? (
+                  {ttsState?.isLoading ? (
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                  ) : ttsState?.isPlaying ? (
                     <VolumeX className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   ) : (
                     <Volume2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -490,14 +493,20 @@ const ChatUI = () => {
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newChatName, setNewChatName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState<{ [key: string]: boolean }>({});
-  const [audioElements, setAudioElements] = useState<{[key: string]: HTMLAudioElement}>({});
   const [assistantTyping, setAssistantTyping] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentView, setCurrentView] = useState<'welcome' | 'chat'>('welcome');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // ADD THIS - TTS State Management
+  // Enhanced TTS State Management - tracking per message
+  const [ttsStates, setTtsStates] = useState<{
+    [messageId: string]: {
+      isLoading: boolean;
+      isPlaying: boolean;
+      audioElement: HTMLAudioElement | null;
+      abortController: AbortController | null;
+    }
+  }>({});
   const [isTTSEnabled, setIsTTSEnabled] = useState(false);
   const [isTTSPlaying, setIsTTSPlaying] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
@@ -977,6 +986,22 @@ const handleStopRecording = async () => {
     initialize();
   }, [navigate, fetchUserChats]);
 
+  // Cleanup TTS states when component unmounts or session changes
+  useEffect(() => {
+    return () => {
+      // Cleanup all TTS states when component unmounts or session changes
+      Object.values(ttsStates).forEach(state => {
+        if (state.audioElement) {
+          state.audioElement.pause();
+          URL.revokeObjectURL(state.audioElement.src);
+        }
+        if (state.abortController) {
+          state.abortController.abort();
+        }
+      });
+    };
+  }, [currentSessionId, ttsStates]); // Cleanup when session changes
+
   // Session management
   const startNewChat = useCallback(() => {
     setCurrentSessionId(null);
@@ -1039,55 +1064,175 @@ const handleStopRecording = async () => {
     }
   }, [sendMessage]);
 
-  // TTS functionality
+  // Enhanced TTS functionality with proper request management
   const playTTS = useCallback(async (text: string, messageId: string) => {
     try {
-      if (isPlaying[messageId]) {
-        if (audioElements[messageId]) {
-          audioElements[messageId].pause();
-          audioElements[messageId].currentTime = 0;
-          delete audioElements[messageId];
-        }
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+      const currentState = ttsStates[messageId];
+      
+      // If already loading, ignore subsequent clicks
+      if (currentState?.isLoading) {
+        console.log(`TTS already loading for message ${messageId}, ignoring click`);
+        return;
+      }
+      
+      // If currently playing, stop the audio
+      if (currentState?.isPlaying && currentState?.audioElement) {
+        currentState.audioElement.pause();
+        currentState.audioElement.currentTime = 0;
+        URL.revokeObjectURL(currentState.audioElement.src);
+        
+        setTtsStates(prev => ({
+          ...prev,
+          [messageId]: {
+            ...prev[messageId],
+            isPlaying: false,
+            audioElement: null
+          }
+        }));
         return;
       }
 
+      // Create abort controller for this request
+      const abortController = new AbortController();
+      
+      // Set loading state
+      setTtsStates(prev => ({
+        ...prev,
+        [messageId]: {
+          isLoading: true,
+          isPlaying: false,
+          audioElement: null,
+          abortController
+        }
+      }));
+
       const loadingToast = toast.loading("Generating speech...");
 
-      const response = await fetch(`${API_BASE_URL}/text-to-speech`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
+      try {
+        const response = await fetch(`${API_BASE_URL}/text-to-speech`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: abortController.signal // Add abort signal
+        });
 
-      toast.dismiss(loadingToast);
+        toast.dismiss(loadingToast);
 
-      if (!response.ok) {
-        throw new Error(`TTS request failed: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`TTS request failed: ${response.status}`);
+        }
+
+        // Check if request was aborted
+        if (abortController.signal.aborted) {
+          console.log("TTS request was aborted");
+          return;
+        }
+
+        const audioBlob = await response.blob();
+        
+        // Check again if aborted after blob creation
+        if (abortController.signal.aborted) {
+          console.log("TTS request was aborted after blob creation");
+          return;
+        }
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+
+        // Set up audio event handlers
+        audio.onloadeddata = () => {
+          // Update state when audio is ready to play
+          setTtsStates(prev => {
+            // Check if this is still the current request (not cancelled)
+            const currentRequestState = prev[messageId];
+            if (currentRequestState?.abortController === abortController) {
+              return {
+                ...prev,
+                [messageId]: {
+                  isLoading: false,
+                  isPlaying: true,
+                  audioElement: audio,
+                  abortController: null
+                }
+              };
+            }
+            // If it's not the current request, clean up
+            URL.revokeObjectURL(audioUrl);
+            return prev;
+          });
+        };
+
+        audio.onended = () => {
+          setTtsStates(prev => ({
+            ...prev,
+            [messageId]: {
+              isLoading: false,
+              isPlaying: false,
+              audioElement: null,
+              abortController: null
+            }
+          }));
+          URL.revokeObjectURL(audioUrl);
+        };
+
+        audio.onerror = () => {
+          console.error("TTS audio playback failed");
+          setTtsStates(prev => ({
+            ...prev,
+            [messageId]: {
+              isLoading: false,
+              isPlaying: false,
+              audioElement: null,
+              abortController: null
+            }
+          }));
+          URL.revokeObjectURL(audioUrl);
+          toast.error("Failed to play audio");
+        };
+
+        // Start playing
+        await audio.play();
+        toast.success("Playing audio");
+
+      } catch (error: any) {
+        toast.dismiss(loadingToast);
+        
+        if (error.name === 'AbortError') {
+          console.log("TTS request was cancelled");
+          toast.success("Audio request cancelled");
+        } else {
+          console.error("TTS error:", error);
+          toast.error("Failed to generate audio");
+        }
+        
+        // Reset state on error
+        setTtsStates(prev => ({
+          ...prev,
+          [messageId]: {
+            isLoading: false,
+            isPlaying: false,
+            audioElement: null,
+            abortController: null
+          }
+        }));
       }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-
-      audio.onended = () => {
-        setIsPlaying(prev => ({ ...prev, [messageId]: false }));
-        URL.revokeObjectURL(audioUrl);
-        delete audioElements[messageId];
-      };
-
-      setAudioElements(prev => ({ ...prev, [messageId]: audio }));
-      setIsPlaying(prev => ({ ...prev, [messageId]: true }));
-
-      await audio.play();
-      toast.success("Playing audio");
 
     } catch (error) {
       console.error("TTS error:", error);
       toast.error("Failed to generate audio");
-      setIsPlaying(prev => ({ ...prev, [messageId]: false }));
+      
+      // Reset state on error
+      setTtsStates(prev => ({
+        ...prev,
+        [messageId]: {
+          isLoading: false,
+          isPlaying: false,
+          audioElement: null,
+          abortController: null
+        }
+      }));
     }
-  }, [isPlaying, audioElements]);
+  }, [ttsStates]);
 
   // Copy functionality
   const copyText = useCallback(async (text: string) => {
@@ -1390,7 +1535,7 @@ const handleStopRecording = async () => {
                         key={index}
                         message={message}
                         index={index}
-                        isPlaying={isPlaying[`msg-${index}`] || false}
+                        ttsState={ttsStates[`msg-${index}`]} // Pass the TTS state
                         onPlayTTS={playTTS}
                         onCopy={copyText}
                       />
