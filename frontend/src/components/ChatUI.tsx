@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/dialog';
 import { ThemeToggle } from './layout/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeProvider';
-import { cn } from '@/lib/utils';
+import { cn, sortByDateTime, formatLastActivity } from '@/lib/utils';
 
 // Types
 interface Message {
@@ -68,6 +68,41 @@ interface STTResponse {
 
 // Constants
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+// Session sorting function
+const sortSessionsByDateTime = (sessions: Session[]): Session[] => {
+  return sessions.sort((a, b) => {
+    const getLastActivityTime = (session: Session): number => {
+      // Use lastUpdated (from Appwrite's $updatedAt)
+      if (session.lastUpdated && session.lastUpdated > 0) {
+        return session.lastUpdated;
+      }
+      
+      // Try to find the last message timestamp
+      if (session.messages && session.messages.length > 0) {
+        for (let i = session.messages.length - 1; i >= 0; i--) {
+          const msg = session.messages[i];
+          if (msg.timestamp && msg.timestamp > 0) {
+            return msg.timestamp;
+          }
+        }
+      }
+      
+      // Fallback to createdAt (from Appwrite's $createdAt)
+      if (session.createdAt && session.createdAt > 0) {
+        return session.createdAt;
+      }
+      
+      // Ultimate fallback
+      return Date.now();
+    };
+
+    const timeA = getLastActivityTime(a);
+    const timeB = getLastActivityTime(b);
+    
+    return timeB - timeA; // Most recent first
+  });
+};
 
 // Enhanced Markdown Components
 const MarkdownComponents = {
@@ -399,9 +434,11 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
   onExport: () => void;
 }) => {
   const lastMessage = session.messages[session.messages.length - 1];
-  const timeAgo = session.lastUpdated ? 
-    new Date(session.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
-    '';
+  const timeAgo = session.lastUpdated 
+    ? formatLastActivity(session.lastUpdated)
+    : session.createdAt 
+      ? formatLastActivity(session.createdAt)
+      : '';
 
   return (
     <motion.div
@@ -804,11 +841,10 @@ const handleStopRecording = async () => {
       const res = await fetch(`${API_BASE_URL}/chats/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch chats");
       const userSessions: Session[] = await res.json();
-      setSessions(userSessions.map(session => ({
-        ...session,
-        lastUpdated: Date.now() - Math.random() * 24 * 60 * 60 * 1000,
-        createdAt: Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
-      })));
+      
+      // Sort sessions by datetime before setting state
+      const sortedSessions = sortSessionsByDateTime(userSessions);
+      setSessions(sortedSessions);
     } catch (error) {
       console.error("Failed to fetch user chats:", error);
       toast.error("Could not load your chats.");
@@ -892,6 +928,9 @@ const handleStopRecording = async () => {
         }
         return s;
       }));
+
+      // Reorder sessions after successful message
+      setSessions(prev => sortSessionsByDateTime(prev));
 
       // TTS for assistant response if enabled
       if (isTTSEnabled && data.response && !isTTSPlaying) {
@@ -1415,7 +1454,6 @@ const handleStopRecording = async () => {
                   Recent Conversations
                 </h3>
                 {filteredSessions
-                  .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
                   .map((session) => (
                     <ChatItem
                       key={session.id}

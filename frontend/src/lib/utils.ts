@@ -176,3 +176,62 @@ export function isValidEmail(email: string): boolean {
 export function generateGradientClass(from: string, to: string): string {
   return `bg-gradient-to-r from-${from} to-${to}`
 }
+
+// Enhanced datetime sorting utility
+export function sortByDateTime<T extends { lastUpdated?: number; createdAt?: number; messages?: Array<{ timestamp?: number }> }>(
+  items: T[],
+  order: 'asc' | 'desc' = 'desc'
+): T[] {
+  return items.sort((a, b) => {
+    const getLastActivityTime = (item: T): number => {
+      // Try lastUpdated first
+      if (item.lastUpdated && item.lastUpdated > 0) {
+        return item.lastUpdated;
+      }
+      
+      // Try to find the last message timestamp
+      if (item.messages && item.messages.length > 0) {
+        for (let i = item.messages.length - 1; i >= 0; i--) {
+          const msg = item.messages[i];
+          if (msg.timestamp && msg.timestamp > 0) {
+            return msg.timestamp;
+          }
+        }
+      }
+      
+      // Fallback to createdAt
+      if (item.createdAt && item.createdAt > 0) {
+        return item.createdAt;
+      }
+      
+      // Ultimate fallback - use current time
+      return Date.now();
+    };
+
+    const timeA = getLastActivityTime(a);
+    const timeB = getLastActivityTime(b);
+    
+    return order === 'desc' ? timeB - timeA : timeA - timeB;
+  });
+}
+
+// Format last activity for display
+export function formatLastActivity(timestamp: number): string {
+  const now = new Date();
+  const messageDate = new Date(timestamp);
+  const diffInDays = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays === 0) {
+    // Today - show time only
+    return formatTime(messageDate);
+  } else if (diffInDays === 1) {
+    // Yesterday
+    return 'Yesterday';
+  } else if (diffInDays < 7) {
+    // This week - show day name
+    return new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(messageDate);
+  } else {
+    // Older - show date
+    return formatDate(messageDate);
+  }
+}

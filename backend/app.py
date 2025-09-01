@@ -4,6 +4,8 @@ import json
 import tempfile
 import logging
 import io
+import time
+from datetime import datetime
 from fastapi import FastAPI, HTTPException, Request, Depends, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -89,25 +91,45 @@ async def root():
 
 @app.get("/chats/{user_id}")
 async def get_user_chats(user_id: str, db: Databases = Depends(get_db)):
-    """Fetches all chat sessions for a given user."""
+    """Fetches all chat sessions for a given user, sorted by update time."""
     try:
         from appwrite.query import Query
+        
         db_id = os.getenv("APPWRITE_DATABASE_ID")
         collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+        
+        # Use Appwrite's built-in ordering by $updatedAt
         response = db.list_documents(
             db_id,
             collection_id,
-            queries=[Query.equal("userId", user_id)]
+            queries=[
+                Query.equal("userId", user_id),
+                Query.order_desc("$updatedAt")  # Sort by Appwrite's built-in update time
+            ]
         )
 
         chats = []
         for doc in response['documents']:
             messages = json.loads(doc.get('messages', '[]'))
+            
+            # Convert Appwrite's ISO timestamps to milliseconds for consistency
+            created_at = None
+            last_updated = None
+            
+            if doc.get('$createdAt'):
+                created_at = int(datetime.fromisoformat(doc['$createdAt'].replace('Z', '+00:00')).timestamp() * 1000)
+            
+            if doc.get('$updatedAt'):
+                last_updated = int(datetime.fromisoformat(doc['$updatedAt'].replace('Z', '+00:00')).timestamp() * 1000)
+            
             chats.append({
                 "id": doc['$id'],
                 "name": doc['name'],
-                "messages": messages
+                "messages": messages,
+                "createdAt": created_at,
+                "lastUpdated": last_updated
             })
+        
         return chats
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -118,14 +140,23 @@ async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
     session_id = request.session_id
     user_id = request.user_id
     user_message = request.message
+    
     db_id = os.getenv("APPWRITE_DATABASE_ID")
     collection_id = os.getenv("APPWRITE_COLLECTION_ID")
+    
     messages_history = []
     new_title = None
-
+    current_timestamp = int(time.time() * 1000)
+    
     if request.is_new_chat:
-        # Create new document for the chat
-        doc_data = {'userId': user_id, 'sessionId': session_id, 'name': 'New Chat', 'messages': '[]'}
+        # Create new document - let Appwrite handle timestamps automatically
+        doc_data = {
+            'userId': user_id, 
+            'sessionId': session_id, 
+            'name': 'New Chat', 
+            'messages': '[]'
+            # Don't add createdAt/lastUpdated - Appwrite handles this automatically
+        }
         permissions = [Permission.read(Role.user(user_id)), Permission.update(Role.user(user_id)), Permission.delete(Role.user(user_id))]
         db.create_document(db_id, collection_id, session_id, doc_data, permissions)
     else:
@@ -136,20 +167,35 @@ async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
         except Exception as e:
             raise HTTPException(status_code=404, detail=f"Chat session not found: {session_id}")
 
-    messages_history.append({"role": "user", "content": user_message})
+    # Add user message with timestamp
+    messages_history.append({
+        "role": "user", 
+        "content": user_message,
+        "timestamp": current_timestamp
+    })
+
     formatted_messages = format_history(messages_history)
     initial_state = {"messages": formatted_messages}
     final_state = await graph.ainvoke(initial_state)
     assistant_response = final_state["messages"][-1].content
-    messages_history.append({"role": "assistant", "content": assistant_response})
-    update_data = {'messages': json.dumps(messages_history)}
 
+    # Add assistant response with timestamp
+    messages_history.append({
+        "role": "assistant", 
+        "content": assistant_response,
+        "timestamp": current_timestamp
+    })
+
+    # Update only the messages - Appwrite will update $updatedAt automatically
+    update_data = {'messages': json.dumps(messages_history)}
+    
     # If it was a new chat, generate and set the title
     if request.is_new_chat:
         new_title = generate_chat_title(user_message)
         update_data['name'] = new_title
 
     db.update_document(db_id, collection_id, session_id, update_data)
+    
     return {"status": "success", "response": assistant_response, "newName": new_title}
 
 @app.post("/clear-history")
