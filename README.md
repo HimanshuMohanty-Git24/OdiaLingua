@@ -100,7 +100,16 @@
 <tr>
 <td>
 
-### 🌐 Real-Time Information
+### � Advanced Speech Recognition
+- Native Odia speech-to-text conversion
+- Powered by Sarvam AI's Saarika v2.5 model
+- Automatic language detection for multilingual speakers
+- Support for multiple audio formats
+
+</td>
+<td>
+
+### �🌐 Real-Time Information
 - Live data from multiple sources
 - Weather forecasts and current events
 - Google AI Overview integration

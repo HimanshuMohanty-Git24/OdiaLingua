@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getUser, logoutUser } from "@/auth";
 import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
+import { useAudioRecording } from '@/hooks/use-audio-recording';
+import { VoiceRecorder } from '@/components/ui/voice-recorder';
 import { 
   VolumeX, Volume2, Copy, Send, Plus, Settings, 
   MoreVertical, Trash2, Edit3, Menu, X, 
@@ -10,7 +12,8 @@ import {
   Clock, Zap, Shield, ArrowLeft, RotateCcw,
   ChevronDown, Search, Home, Archive,
   Minimize2, Download, Share2, Mic, Image,
-  Paperclip, Smile, Phone, Video, Info
+  Paperclip, Smile, Phone, Video, Info,
+  Loader2, CheckCircle, AlertCircle, Languages
 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -54,6 +57,13 @@ interface Session {
   messages: Message[];
   lastUpdated?: number;
   createdAt?: number;
+}
+
+interface STTResponse {
+  success: boolean;
+  transcript: string;
+  detected_language: string;
+  message: string;
 }
 
 // Constants
@@ -487,9 +497,149 @@ const ChatUI = () => {
   const [currentView, setCurrentView] = useState<'welcome' | 'chat'>('welcome');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  // ADD THIS - TTS State Management
+  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const [isTTSPlaying, setIsTTSPlaying] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  
+  // Add voice recording functionality
+  const {
+    isRecording,
+    isProcessing: isRecordingProcessing,
+    audioLevel,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+  } = useAudioRecording();
+
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Voice recording handlers
+  const handleStartRecording = async () => {
+    try {
+      await startRecording();
+      toast.success(
+        <div className="flex items-center space-x-2">
+          <Mic className="h-4 w-4" />
+          <span>Recording started. Speak now...</span>
+        </div>,
+        { duration: 2000 }
+      );
+    } catch (error: any) {
+      toast.error(
+        <div className="flex items-center space-x-2">
+          <AlertCircle className="h-4 w-4" />
+          <span>{error.message || 'Failed to start recording'}</span>
+        </div>
+      );
+    }
+  };
+
+const handleStopRecording = async () => {
+  try {
+    setIsTranscribing(true);
+    
+    const audioBlob = await stopRecording();
+    
+    if (!audioBlob) {
+      toast.error('No audio recorded. Please try again.');
+      return;
+    }
+
+    // Create FormData for the API request
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+
+    const response = await fetch(`${API_BASE_URL}/speech-to-text`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const result: STTResponse = await response.json();
+
+    if (result.success && result.transcript?.trim()) {
+      
+      // Set the transcribed text to the message input
+      setMessageInput(result.transcript);
+      
+      // Focus the textarea for immediate editing if needed
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+      
+      // Show language detection info with enhanced styling
+      if (result.detected_language && result.detected_language !== 'unknown') {
+        const languageNames: Record<string, string> = {
+          'od-IN': 'Odia',
+          'en-IN': 'English', 
+          'hi-IN': 'Hindi',
+          'bn-IN': 'Bengali',
+          'te-IN': 'Telugu',
+          'ta-IN': 'Tamil',
+          'ml-IN': 'Malayalam',
+          'kn-IN': 'Kannada',
+          'gu-IN': 'Gujarati',
+          'pa-IN': 'Punjabi',
+          'mr-IN': 'Marathi'
+        };
+        const detectedLang = languageNames[result.detected_language] || result.detected_language;
+        
+        toast.success(
+          <div className="flex items-center space-x-2">
+            <Languages className="h-4 w-4" />
+            <span>Detected: {detectedLang}</span>
+          </div>,
+          {
+            duration: 3000,
+            icon: '🎯',
+          }
+        );
+      }
+    } else {
+      toast.error(
+        <div className="flex items-center space-x-2">
+          <AlertCircle className="h-4 w-4" />
+          <span>Could not transcribe audio. Please speak clearly and try again.</span>
+        </div>
+      );
+    }
+
+  } catch (error) {
+    console.error('Transcription error:', error);
+    let errorMessage = 'Failed to transcribe audio';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message.includes('HTTP') 
+        ? `Server error: ${error.message}`
+        : `Transcription error: ${error.message}`;
+    }
+    
+    toast.error(
+      <div className="flex items-center space-x-2">
+        <AlertCircle className="h-4 w-4" />
+        <span>{errorMessage}</span>
+      </div>
+    );
+  } finally {
+    setIsTranscribing(false);
+  }
+};
+
+
+
+  const handleCancelRecording = () => {
+    cancelRecording();
+    toast.success('Recording cancelled');
+  };
 
   // Auto-scroll to bottom
   const scrollToBottom = useCallback(() => {
@@ -734,6 +884,60 @@ const ChatUI = () => {
         return s;
       }));
 
+      // TTS for assistant response if enabled
+      if (isTTSEnabled && data.response && !isTTSPlaying) {
+        setIsTTSPlaying(true);
+        
+        // Stop any currently playing audio
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          URL.revokeObjectURL(currentAudio.src);
+        }
+
+        try {
+          const ttsResponse = await fetch(`${API_BASE_URL}/text-to-speech`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: data.response,
+            }),
+          });
+
+          if (ttsResponse.ok) {
+            const audioBlob = await ttsResponse.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            
+            setCurrentAudio(audio);
+            
+            audio.onended = () => {
+              setIsTTSPlaying(false);
+              setCurrentAudio(null);
+              URL.revokeObjectURL(audioUrl);
+            };
+            
+            audio.onerror = () => {
+              setIsTTSPlaying(false);
+              setCurrentAudio(null);
+              URL.revokeObjectURL(audioUrl);
+              console.error('TTS audio playback failed');
+            };
+            
+            await audio.play();
+          } else {
+            throw new Error(`TTS request failed: ${ttsResponse.status}`);
+          }
+        } catch (ttsError) {
+          console.error('TTS error:', ttsError);
+          setIsTTSPlaying(false);
+          setCurrentAudio(null);
+          toast.error('Failed to play audio response');
+        }
+      }
+
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
       const errorMessage: Message = { 
@@ -750,7 +954,7 @@ const ChatUI = () => {
     } finally {
       setAssistantTyping(false);
     }
-  }, [messageInput, user, currentSessionId, assistantTyping, currentView]);
+  }, [messageInput, user, currentSessionId, assistantTyping, currentView, isTTSEnabled, isTTSPlaying, currentAudio]);
 
   // Initialize component
   useEffect(() => {
@@ -1217,14 +1421,76 @@ const ChatUI = () => {
             <div className="p-3 sm:p-4 lg:p-6 border-t border-border/50 bg-card/30 backdrop-blur-xl">
               <div className="max-w-4xl mx-auto">
                 <div className="relative flex items-end gap-2 sm:gap-3">
+                  {/* Enhanced STT Status Display */}
+                  <AnimatePresence>
+                    {(isRecording || isRecordingProcessing || isTranscribing) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="absolute -top-14 left-0 right-0 flex items-center justify-center space-x-3 py-2 px-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 backdrop-blur-sm"
+                      >
+                        {isTranscribing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+                            <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                              Processing speech...
+                            </span>
+                          </>
+                        ) : isRecordingProcessing ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                            <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                              Finalizing recording...
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <motion.div
+                              animate={{ scale: [1, 1.1, 1] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              <Mic className="h-4 w-4 text-red-600" />
+                            </motion.div>
+                            <span className="text-sm text-red-600 dark:text-red-400 font-medium">
+                              Listening... Speak clearly
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              {[...Array(5)].map((_, i) => (
+                                <motion.div
+                                  key={i}
+                                  className="w-1 bg-red-500 rounded-full"
+                                  animate={{
+                                    height: [4, 8 + audioLevel * 12, 4],
+                                  }}
+                                  transition={{
+                                    duration: 0.5,
+                                    repeat: Infinity,
+                                    delay: i * 0.1,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="flex-1 relative">
                     <textarea
                       ref={inputRef}
-                      className="w-full max-h-24 sm:max-h-32 p-3 sm:p-4 pr-10 sm:pr-12 rounded-2xl border border-border/50 bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 placeholder:text-muted-foreground text-sm sm:text-base"
-                      placeholder="Type your message... (Press Enter to send)"
+                      className="w-full max-h-24 sm:max-h-32 p-3 sm:p-4 pr-16 sm:pr-20 rounded-2xl border border-border/50 bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 placeholder:text-muted-foreground text-sm sm:text-base"
+                      placeholder={
+                        isRecording 
+                          ? "Listening..." 
+                          : isTranscribing 
+                            ? "Transcribing..." 
+                            : "Type your message or click mic to speak... (Press Enter to send)"
+                      }
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
-                      disabled={assistantTyping}
+                      disabled={assistantTyping || isRecording || isTranscribing}
                       rows={1}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -1232,20 +1498,33 @@ const ChatUI = () => {
                         target.style.height = Math.min(target.scrollHeight, window.innerWidth < 640 ? 96 : 128) + 'px';
                       }}
                     />
+
+                    {/* Voice Recorder - positioned inside the textarea */}
+                    <div className="absolute right-12 sm:right-14 top-1/2 -translate-y-1/2">
+                      <VoiceRecorder
+                        isRecording={isRecording}
+                        isProcessing={isRecordingProcessing || isTranscribing}
+                        audioLevel={audioLevel}
+                        onStartRecording={handleStartRecording}
+                        onStopRecording={handleStopRecording}
+                        onCancelRecording={handleCancelRecording}
+                        disabled={assistantTyping}
+                      />
+                    </div>
                   </div>
                   
                   <Button
                     onClick={() => sendMessage()}
-                    disabled={!messageInput.trim() || assistantTyping}
+                    disabled={!messageInput.trim() || assistantTyping || isRecording || isTranscribing}
                     size="lg"
                     className={cn(
                       "w-10 h-10 sm:w-12 sm:h-12 p-0 rounded-xl transition-all duration-300 flex-shrink-0",
-                      messageInput.trim() && !assistantTyping
+                      (messageInput.trim() && !assistantTyping && !isRecording && !isTranscribing)
                         ? "btn-gradient shadow-lg hover:shadow-xl"
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {assistantTyping ? (
+                    {assistantTyping || isTranscribing ? (
                       <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <Send className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -1253,12 +1532,17 @@ const ChatUI = () => {
                   </Button>
                 </div>
                 
-                {/* Footer Info */}
+                {/* Enhanced Footer Info */}
                 <div className="flex items-center justify-center mt-3 sm:mt-4 gap-3 sm:gap-6 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1 sm:gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     <span className="hidden sm:inline">AI Online</span>
                     <span className="sm:hidden">Online</span>
+                  </div>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Mic className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    <span className="hidden sm:inline">Voice Enabled</span>
+                    <span className="sm:hidden">Voice</span>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2">
                     <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3" />

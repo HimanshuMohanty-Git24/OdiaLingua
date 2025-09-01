@@ -11,3 +11,4 @@ sarvamai
 appwrite
 googletrans
 google-search-results
+python-multipart

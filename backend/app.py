@@ -1,7 +1,10 @@
 import os
 import uuid
 import json
-from fastapi import FastAPI, HTTPException, Request, Depends
+import tempfile
+import logging
+import io
+from fastapi import FastAPI, HTTPException, Request, Depends, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -13,12 +16,17 @@ from appwrite.permission import Permission
 from appwrite.role import Role
 from langchain_core.messages import HumanMessage, AIMessage
 
+# Configure logger
+logger = logging.getLogger("OdiaLinguaBackend")
+logging.basicConfig(level=logging.INFO)
+
 # Load environment variables
 load_dotenv()
 
 # Local imports
 from graph import graph
 from services.tts_service import generate_odia_speech
+from services.stt_service import transcribe_audio, is_supported_audio_format
 from agents.title_agent import generate_chat_title
 
 # Initialize FastAPI App
@@ -73,6 +81,7 @@ def format_history(messages_list: list) -> list:
     ]
 
 # --- API Endpoints ---
+
 @app.get("/")
 async def root():
     """A simple health check endpoint."""
@@ -85,13 +94,12 @@ async def get_user_chats(user_id: str, db: Databases = Depends(get_db)):
         from appwrite.query import Query
         db_id = os.getenv("APPWRITE_DATABASE_ID")
         collection_id = os.getenv("APPWRITE_COLLECTION_ID")
-        
         response = db.list_documents(
             db_id,
             collection_id,
             queries=[Query.equal("userId", user_id)]
         )
-        
+
         chats = []
         for doc in response['documents']:
             messages = json.loads(doc.get('messages', '[]'))
@@ -104,14 +112,12 @@ async def get_user_chats(user_id: str, db: Databases = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/chat")
 async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
     """Main chat endpoint. Handles new chat creation, titling, and conversation."""
     session_id = request.session_id
     user_id = request.user_id
     user_message = request.message
-    
     db_id = os.getenv("APPWRITE_DATABASE_ID")
     collection_id = os.getenv("APPWRITE_COLLECTION_ID")
     messages_history = []
@@ -131,15 +137,11 @@ async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
             raise HTTPException(status_code=404, detail=f"Chat session not found: {session_id}")
 
     messages_history.append({"role": "user", "content": user_message})
-    
     formatted_messages = format_history(messages_history)
     initial_state = {"messages": formatted_messages}
-    
     final_state = await graph.ainvoke(initial_state)
     assistant_response = final_state["messages"][-1].content
-
     messages_history.append({"role": "assistant", "content": assistant_response})
-    
     update_data = {'messages': json.dumps(messages_history)}
 
     # If it was a new chat, generate and set the title
@@ -148,9 +150,7 @@ async def chat(request: ChatRequest, db: Databases = Depends(get_db)):
         update_data['name'] = new_title
 
     db.update_document(db_id, collection_id, session_id, update_data)
-    
     return {"status": "success", "response": assistant_response, "newName": new_title}
-
 
 @app.post("/clear-history")
 async def clear_history(request: SessionActionRequest, db: Databases = Depends(get_db)):
@@ -193,20 +193,72 @@ async def rename_chat(request: RenameRequest, db: Databases = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Session not found: {str(e)}")
 
-
 @app.post("/text-to-speech")
 async def text_to_speech(request: TTSRequest):
     try:
         text = request.text.strip()
         if not text:
             raise HTTPException(status_code=400, detail="Empty text provided")
-        
         audio_content = await generate_odia_speech(text)
-        
         return StreamingResponse(iter([audio_content]), media_type="audio/wav")
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/speech-to-text")
+async def speech_to_text(audio: UploadFile = File(...)):
+    """
+    Convert speech to text using Sarvam AI's Saarika model
+    with automatic language detection for Odia/English/Hindi speakers.
+    """
+    try:
+        logger.info(f"Received STT request for file: {audio.filename}")
+        logger.info(f"Content type: {audio.content_type}")
+        
+        # Validate file
+        if not audio.filename:
+            logger.error("No filename provided")
+            raise HTTPException(status_code=400, detail="No file provided")
+        
+        if not is_supported_audio_format(audio.filename):
+            logger.error(f"Unsupported format: {audio.filename}")
+            raise HTTPException(
+                status_code=400,
+                detail="Unsupported audio format. Please use supported formats."
+            )
+
+        # Read the uploaded audio file
+        audio_content = await audio.read()
+        logger.info(f"Audio file size: {len(audio_content)} bytes")
+        
+        if len(audio_content) == 0:
+            logger.error("Empty audio file received")
+            raise HTTPException(status_code=400, detail="Empty audio file")
+
+        # Check file size limit
+        max_size = 10 * 1024 * 1024  # 10MB limit for safety
+        if len(audio_content) > max_size:
+            logger.error(f"File too large: {len(audio_content)} bytes")
+            raise HTTPException(status_code=400, detail="Audio file too large. Maximum size is 10MB")
+
+        # Create a temporary file-like object
+        audio_file = io.BytesIO(audio_content)
+        
+        # Transcribe using Sarvam AI
+        result = await transcribe_audio(audio_file, language_code="unknown")
+        
+        logger.info(f"Transcription successful: {result}")
+        return {
+            "success": True,
+            "transcript": result["transcript"],
+            "detected_language": result["detected_language"],
+            "message": "Speech transcribed successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in STT endpoint: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
