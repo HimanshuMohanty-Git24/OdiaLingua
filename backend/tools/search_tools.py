@@ -19,11 +19,13 @@ def _dbg(tag, obj):
         txt = str(obj)[:1600]
     print(f"\n🟡 DEBUG {tag}:\n{txt}\n{'─'*60}")
 
-def _ensure_english(q: str) -> str:
-    """Translate to English if the query is not mostly Latin characters."""
+async def _ensure_english_async(q: str) -> str:
+    """Async translate to English if the query is not mostly Latin characters."""
     if re.fullmatch(r"[A-Za-z0-9 ,.'\"?%:-]+", q):
         return q
-    result = asyncio.run(translator.translate(q, dest="en"))
+    
+    # Use await instead of asyncio.run()
+    result = await translator.translate(q, dest="en")
     return result.text
 
 def _filter_recent(snips: List[str], yr_cutoff=2023) -> List[str]:
@@ -52,12 +54,12 @@ def _extract_ai_overview(ai_block: dict) -> str:
 
 # ── Google AI-Overview primary tool ───────────────────────────────
 @tool
-def google_ai_overview_snippets(query: str) -> str:
+async def google_ai_overview_snippets(query: str) -> str:
     """
     Return up-to-date snippets from Google AI Overview.
     Falls back to answer-box / knowledge graph / organic snippets.
     """
-    q_en = _ensure_english(query)
+    q_en = await _ensure_english_async(query)
     _dbg("google_ai_overview_snippets → query", q_en)
 
     if not SERPAPI_API_KEY:
@@ -117,12 +119,12 @@ def google_ai_overview_snippets(query: str) -> str:
 
 # ── Standard Google fallback (organic / overview) ─────────────────
 @tool
-def google_search_snippets(query: str) -> str:
+async def google_search_snippets(query: str) -> str:
     """
     Search Google for organic results and return snippets.
     Falls back to standard search results when AI Overview is not available.
     """
-    q_en=_ensure_english(query)
+    q_en = await _ensure_english_async(query)
     _dbg("google_search → query", q_en)
 
     if not SERPAPI_API_KEY:
@@ -145,12 +147,12 @@ def google_search_snippets(query: str) -> str:
 
 # ── Tavily snippets (news) ────────────────────────────────────────
 @tool
-def tavily_search_snippets(query: str) -> str:
+async def tavily_search_snippets(query: str) -> str:
     """
     Search Tavily API for news-focused results and return content snippets.
     Specialized for current events and recent news articles.
     """
-    q_en=_ensure_english(query)
+    q_en = await _ensure_english_async(query)
     _dbg("tavily_search → query", q_en)
 
     if not TAVILY_API_KEY:

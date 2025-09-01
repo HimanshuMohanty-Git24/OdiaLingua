@@ -74,16 +74,16 @@ If the sources contain conflicting information, present both versions clearly.
 """)
 ])
 
-def research_agent_node(state):
+async def research_agent_node(state):
     """Enhanced research agent with stronger anti-hallucination measures."""
     q = state["messages"][-1].content.strip()
     print(f"\n🔵 RESEARCH-AGENT processing: {q}")
     print("🔍 Activating enhanced fact-verification protocol...")
 
     # Gather evidence from multiple sources
-    aio = google_ai_overview_snippets.invoke(q)
-    g_sn = google_search_snippets.invoke(q)
-    tv = tavily_search_snippets.invoke(q)
+    aio = await google_ai_overview_snippets.ainvoke(q)
+    g_sn = await google_search_snippets.ainvoke(q)
+    tv = await tavily_search_snippets.ainvoke(q)
 
     _log("Google AIO", aio)
     _log("Google Organic", g_sn) 
