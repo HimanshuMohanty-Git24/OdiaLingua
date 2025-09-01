@@ -100,7 +100,7 @@
 <tr>
 <td>
 
-### � Advanced Speech Recognition
+### 🎙️ Advanced Speech Recognition
 - Native Odia speech-to-text conversion
 - Powered by Sarvam AI's Saarika v2.5 model
 - Automatic language detection for multilingual speakers
@@ -109,7 +109,7 @@
 </td>
 <td>
 
-### �🌐 Real-Time Information
+### 🌐 Real-Time Information
 - Live data from multiple sources
 - Weather forecasts and current events
 - Google AI Overview integration
@@ -636,5 +636,6 @@ We welcome contributions from developers, linguists, and Odia language enthusias
 **⭐ Don't forget to star this repository if you found it helpful!**
 
 </div>
+
 
 
