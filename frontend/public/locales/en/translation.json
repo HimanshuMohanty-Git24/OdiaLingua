@@ -1,0 +1,62 @@
+{
+  "greeting": "Hello, World!",
+  "contact": "Contact",
+  "getStarted": "Get Started",
+  "features": {
+    "aiConversations": {
+      "title": "AI-Powered Conversations",
+      "description": "Experience natural, context-aware conversations in Odia with our advanced language model"
+    },
+    "realTimeInfo": {
+      "title": "Real-Time Information",
+      "description": "Get instant access to current information with integrated search capabilities"
+    },
+    "speechSynthesis": {
+      "title": "Native Speech Synthesis",
+      "description": "Listen to authentic Odia pronunciation with our advanced text-to-speech technology"
+    },
+    "privacy": {
+      "title": "Privacy First",
+      "description": "Your conversations are secure and private with end-to-end encryption"
+    },
+    "fast": {
+      "title": "Lightning Fast",
+      "description": "Powered by cutting-edge infrastructure for instant responses"
+    },
+    "culturalPreservation": {
+      "title": "Cultural Preservation",
+      "description": "Helping preserve and promote the beautiful Odia language and culture"
+    }
+  },
+  "hero": {
+    "title1": "The First",
+    "title2": "AI-Native",
+    "title3": "Odia Experience",
+    "subtitle": "Revolutionary AI technology meets the rich heritage of Odia language. Chat naturally, learn effortlessly, and explore without limits.",
+    "cta1": "Start Speaking Odia",
+    "cta2": "Explore Features"
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "search": "Search conversations...",
+    "recentConversations": "Recent Conversations",
+    "noConversations": "No conversations yet",
+    "startAConversation": "Start a new chat to begin",
+    "welcome": "Welcome",
+    "messages": "messages",
+    "hello": "Hello,",
+    "companion": "I'm your AI companion for exploring the beautiful Odia language. What would you like to talk about today?",
+    "startConversation": "Start Conversation",
+    "thinking": "AI is thinking...",
+    "sendMessage": "Send",
+    "placeholder": "Type your message or click mic to speak... (Press Enter to send)",
+    "rename": "Rename Conversation",
+    "renameDescription": "Give your conversation a memorable name",
+    "renamePlaceholder": "Enter conversation name",
+    "cancel": "Cancel",
+    "save": "Save",
+    "signOut": "Sign Out",
+    "export": "Export Chat",
+    "settings": "Settings"
+  }
+}

@@ -5,9 +5,9 @@ import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
 import { useAudioRecording } from '@/hooks/use-audio-recording';
 import { VoiceRecorder } from '@/components/ui/voice-recorder';
-import { 
-  VolumeX, Volume2, Copy, Send, Plus, Settings, 
-  MoreVertical, Trash2, Edit3, Menu, X, 
+import {
+  VolumeX, Volume2, Copy, Send, Plus, Settings,
+  MoreVertical, Trash2, Edit3, Menu, X,
   Sparkles, Brain, MessageCircle, User, LogOut,
   Clock, Zap, Shield, ArrowLeft, RotateCcw,
   ChevronDown, Search, Home, Archive,
@@ -41,8 +41,10 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { ThemeToggle } from './layout/ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import { useTheme } from '@/contexts/ThemeProvider';
 import { cn, sortByDateTime, formatLastActivity } from '@/lib/utils';
+import { useTranslation } from "react-i18next";
 
 // Types
 interface Message {
@@ -77,7 +79,7 @@ const sortSessionsByDateTime = (sessions: Session[]): Session[] => {
       if (session.lastUpdated && session.lastUpdated > 0) {
         return session.lastUpdated;
       }
-      
+
       // Try to find the last message timestamp
       if (session.messages && session.messages.length > 0) {
         for (let i = session.messages.length - 1; i >= 0; i--) {
@@ -87,19 +89,19 @@ const sortSessionsByDateTime = (sessions: Session[]): Session[] => {
           }
         }
       }
-      
+
       // Fallback to createdAt (from Appwrite's $createdAt)
       if (session.createdAt && session.createdAt > 0) {
         return session.createdAt;
       }
-      
+
       // Ultimate fallback
       return Date.now();
     };
 
     const timeA = getLastActivityTime(a);
     const timeB = getLastActivityTime(b);
-    
+
     return timeB - timeA; // Most recent first
   });
 };
@@ -115,7 +117,7 @@ const MarkdownComponents = {
   code: ({ node, inline, className, children, ...props }: any) => {
     const { theme } = useTheme();
     const match = /language-(\w+)/.exec(className || '');
-    
+
     return !inline && match ? (
       <div className="relative group my-3 sm:my-4">
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -131,10 +133,10 @@ const MarkdownComponents = {
             <Copy className="w-3 h-3" />
           </Button>
         </div>
-        <SyntaxHighlighter 
-          style={theme === 'dark' ? tomorrow : prism} 
-          language={match[1]} 
-          PreTag="div" 
+        <SyntaxHighlighter
+          style={theme === 'dark' ? tomorrow : prism}
+          language={match[1]}
+          PreTag="div"
           className="rounded-lg sm:rounded-xl text-xs sm:text-sm border border-border/50 shadow-sm"
           {...props}
         >
@@ -187,7 +189,7 @@ const LoadingScreen = () => (
           </motion.div>
         </div>
       </motion.div>
-      
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -202,13 +204,14 @@ const LoadingScreen = () => (
 );
 
 // Welcome Screen for New Chat
-const WelcomeScreen = ({ userName, onStartChat }: { 
-  userName: string; 
-  onStartChat: (suggestion?: string) => void 
+const WelcomeScreen = ({ userName, onStartChat }: {
+  userName: string;
+  onStartChat: (suggestion?: string) => void
 }) => {
+  const { t } = useTranslation();
   const suggestions = [
     "Tell me about Odia culture and traditions",
-    "Help me learn Odia language basics", 
+    "Help me learn Odia language basics",
     "What are famous places in Odisha?",
     "Explain Jagannath temple history"
   ];
@@ -225,16 +228,15 @@ const WelcomeScreen = ({ userName, onStartChat }: {
           <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-gradient-to-r from-primary via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl mb-4 sm:mb-6">
             <Brain className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
           </div>
-          
+
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-            <span className="text-muted-foreground">Hello,</span>
+            <span className="text-muted-foreground">{t('chat.hello')}</span>
             <br />
             <span className="text-gradient">{userName.split(' ')[0] || 'Friend'}!</span>
           </h1>
-          
+
           <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8 px-2">
-            I'm your AI companion for exploring the beautiful Odia language. 
-            What would you like to talk about today?
+            {t('chat.companion')}
           </p>
         </motion.div>
 
@@ -269,7 +271,7 @@ const WelcomeScreen = ({ userName, onStartChat }: {
             className="btn-gradient px-6 sm:px-8 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
           >
             <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            Start Conversation
+            {t('chat.startConversation')}
           </Button>
         </motion.div>
       </div>
@@ -278,33 +280,36 @@ const WelcomeScreen = ({ userName, onStartChat }: {
 };
 
 // Enhanced Typing Indicator
-const TypingIndicator = () => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3"
-  >
-    <div className="flex space-x-1">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
-          className="h-2 w-2 bg-primary rounded-full"
-        />
-      ))}
-    </div>
-    <span className="text-xs sm:text-sm text-muted-foreground">AI is thinking...</span>
-  </motion.div>
-);
+const TypingIndicator = () => {
+  const { t } = useTranslation();
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3"
+    >
+      <div className="flex space-x-1">
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+            className="h-2 w-2 bg-primary rounded-full"
+          />
+        ))}
+      </div>
+      <span className="text-xs sm:text-sm text-muted-foreground">{t('chat.thinking')}</span>
+    </motion.div>
+  );
+}
 
 // Enhanced Markdown Components
-const MessageComponent = React.memo(({ 
-  message, 
-  index, 
+const MessageComponent = React.memo(({
+  message,
+  index,
   ttsState, // Changed from isPlaying to ttsState
-  onPlayTTS, 
-  onCopy 
+  onPlayTTS,
+  onCopy
 }: {
   message: Message;
   index: number;
@@ -315,12 +320,12 @@ const MessageComponent = React.memo(({
   const messageId = `msg-${index}`;
   const formatTime = (timestamp?: number) => {
     if (!timestamp) return '';
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -339,7 +344,7 @@ const MessageComponent = React.memo(({
           </div>
         </div>
       )}
-      
+
       {/* Message Content */}
       <div className={cn(
         "max-w-[85%] sm:max-w-[75%] relative",
@@ -347,39 +352,39 @@ const MessageComponent = React.memo(({
       )}>
         <div className={cn(
           "rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm relative",
-          message.role === "assistant" 
-            ? "bg-card border border-border/50 text-foreground" 
+          message.role === "assistant"
+            ? "bg-card border border-border/50 text-foreground"
             : "bg-gradient-to-r from-primary to-primary/90 text-white shadow-lg"
         )}>
           {/* Message bubble arrow */}
           <div className={cn(
             "absolute top-3 sm:top-4 w-0 h-0",
-            message.role === "assistant" 
+            message.role === "assistant"
               ? "-left-1 sm:-left-2 border-r-[6px] sm:border-r-[8px] border-r-card border-t-[6px] sm:border-t-[8px] border-b-[6px] sm:border-b-[8px] border-t-transparent border-b-transparent"
               : "-right-1 sm:-right-2 border-l-[6px] sm:border-l-[8px] border-l-primary border-t-[6px] sm:border-t-[8px] border-b-[6px] sm:border-b-[8px] border-t-transparent border-b-transparent"
           )} />
-          
+
           {/* Content */}
           <div className={cn(
             "prose prose-sm max-w-none",
-            message.role === "assistant" 
-              ? "prose-slate dark:prose-invert" 
+            message.role === "assistant"
+              ? "prose-slate dark:prose-invert"
               : "[&>*]:text-white [&>*]:mb-2 [&>*:last-child]:mb-0"
           )}>
             <ReactMarkdown components={MarkdownComponents}>
               {message.content}
             </ReactMarkdown>
           </div>
-          
+
           {/* Message time and actions */}
           <div className={cn(
             "text-xs mt-2 flex items-center justify-between",
-            message.role === "assistant" 
-              ? "text-muted-foreground" 
+            message.role === "assistant"
+              ? "text-muted-foreground"
               : "text-white/70"
           )}>
             <span className="text-xs">{formatTime(message.timestamp)}</span>
-            
+
             {/* Message actions */}
             {message.role === "assistant" && (
               <div className="flex items-center gap-0.5 sm:gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -411,7 +416,7 @@ const MessageComponent = React.memo(({
           </div>
         </div>
       </div>
-      
+
       {/* User Avatar */}
       {message.role === "user" && (
         <div className="flex-shrink-0 mt-1 order-2">
@@ -434,9 +439,9 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
   onExport: () => void;
 }) => {
   const lastMessage = session.messages[session.messages.length - 1];
-  const timeAgo = session.lastUpdated 
+  const timeAgo = session.lastUpdated
     ? formatLastActivity(session.lastUpdated)
-    : session.createdAt 
+    : session.createdAt
       ? formatLastActivity(session.createdAt)
       : '';
 
@@ -447,8 +452,8 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
       whileHover={{ x: 2 }}
       className={cn(
         "group relative p-2 sm:p-3 rounded-xl cursor-pointer transition-all duration-200",
-        isActive 
-          ? "bg-primary/10 border border-primary/30 shadow-sm" 
+        isActive
+          ? "bg-primary/10 border border-primary/30 shadow-sm"
           : "hover:bg-muted/50"
       )}
       onClick={onClick}
@@ -460,7 +465,7 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
             isActive ? "text-primary" : "text-muted-foreground"
           )} />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <h4 className={cn(
@@ -471,19 +476,19 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
             </h4>
             <span className="text-xs text-muted-foreground flex-shrink-0 ml-1">{timeAgo}</span>
           </div>
-          
+
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-            {lastMessage 
+            {lastMessage
               ? lastMessage.content.slice(0, 40) + (lastMessage.content.length > 40 ? '...' : '')
               : 'No messages yet'
             }
           </p>
-          
+
           <div className="flex items-center justify-between mt-2">
             <Badge variant="secondary" className="text-xs px-1 py-0">
               {session.messages.length}
             </Badge>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -505,7 +510,7 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
                   Export
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="text-destructive"
                 >
@@ -523,6 +528,7 @@ const ChatItem = ({ session, isActive, onClick, onRename, onDelete, onExport }: 
 
 // Main ChatUI Component
 const ChatUI = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
@@ -534,7 +540,7 @@ const ChatUI = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentView, setCurrentView] = useState<'welcome' | 'chat'>('welcome');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // Enhanced TTS State Management - tracking per message
   const [ttsStates, setTtsStates] = useState<{
     [messageId: string]: {
@@ -547,7 +553,7 @@ const ChatUI = () => {
   const [isTTSEnabled, setIsTTSEnabled] = useState(false);
   const [isTTSPlaying, setIsTTSPlaying] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  
+
   // Add voice recording functionality
   const {
     isRecording,
@@ -559,7 +565,7 @@ const ChatUI = () => {
   } = useAudioRecording();
 
   const [isTranscribing, setIsTranscribing] = useState(false);
-  
+
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -588,9 +594,9 @@ const ChatUI = () => {
 const handleStopRecording = async () => {
   try {
     setIsTranscribing(true);
-    
+
     const audioBlob = await stopRecording();
-    
+
     if (!audioBlob) {
       toast.error('No audio recorded. Please try again.');
       return;
@@ -613,20 +619,20 @@ const handleStopRecording = async () => {
     const result: STTResponse = await response.json();
 
     if (result.success && result.transcript?.trim()) {
-      
+
       // Set the transcribed text to the message input
       setMessageInput(result.transcript);
-      
+
       // Focus the textarea for immediate editing if needed
       if (inputRef.current) {
         inputRef.current.focus();
       }
-      
+
       // Show language detection info with enhanced styling
       if (result.detected_language && result.detected_language !== 'unknown') {
         const languageNames: Record<string, string> = {
           'od-IN': 'Odia',
-          'en-IN': 'English', 
+          'en-IN': 'English',
           'hi-IN': 'Hindi',
           'bn-IN': 'Bengali',
           'te-IN': 'Telugu',
@@ -638,7 +644,7 @@ const handleStopRecording = async () => {
           'mr-IN': 'Marathi'
         };
         const detectedLang = languageNames[result.detected_language] || result.detected_language;
-        
+
         toast.success(
           <div className="flex items-center space-x-2">
             <Languages className="h-4 w-4" />
@@ -662,13 +668,13 @@ const handleStopRecording = async () => {
   } catch (error) {
     console.error('Transcription error:', error);
     let errorMessage = 'Failed to transcribe audio';
-    
+
     if (error instanceof Error) {
-      errorMessage = error.message.includes('HTTP') 
+      errorMessage = error.message.includes('HTTP')
         ? `Server error: ${error.message}`
         : `Transcription error: ${error.message}`;
     }
-    
+
     toast.error(
       <div className="flex items-center space-x-2">
         <AlertCircle className="h-4 w-4" />
@@ -716,12 +722,12 @@ const handleStopRecording = async () => {
       ];
 
       session.messages.forEach((message, index) => {
-        const timestamp = message.timestamp 
+        const timestamp = message.timestamp
           ? new Date(message.timestamp).toLocaleString()
           : 'Unknown time';
-        
+
         const sender = message.role === 'user' ? 'You' : 'OdiaLingua AI';
-        
+
         lines.push(`[${timestamp}] ${sender}:`);
         lines.push(message.content);
         lines.push(''); // Empty line between messages
@@ -733,25 +739,25 @@ const handleStopRecording = async () => {
       lines.push('https://odialingua.com');
 
       const textContent = lines.join('\n');
-      
+
       // Create and trigger download
       const element = document.createElement("a");
       const file = new Blob([textContent], { type: 'text/plain; charset=utf-8' });
       element.href = URL.createObjectURL(file);
-      
+
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
       element.download = `${session.name.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.txt`;
-      
+
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
-      
+
       // Clean up the URL
       URL.revokeObjectURL(element.href);
-      
+
       toast.success("Chat exported successfully!");
-      
+
     } catch (error) {
       console.error('Export failed:', error);
       toast.error("Failed to export chat");
@@ -776,7 +782,7 @@ const handleStopRecording = async () => {
       ];
 
       // Sort sessions by last updated
-      const sortedSessions = [...sessions].sort((a, b) => 
+      const sortedSessions = [...sessions].sort((a, b) =>
         (b.lastUpdated || 0) - (a.lastUpdated || 0)
       );
 
@@ -789,12 +795,12 @@ const handleStopRecording = async () => {
 
         if (session.messages.length > 0) {
           session.messages.forEach((message) => {
-            const timestamp = message.timestamp 
+            const timestamp = message.timestamp
               ? new Date(message.timestamp).toLocaleString()
               : 'Unknown time';
-            
+
             const sender = message.role === 'user' ? 'You' : 'OdiaLingua AI';
-            
+
             lines.push(`[${timestamp}] ${sender}:`);
             lines.push(message.content);
             lines.push('');
@@ -803,7 +809,7 @@ const handleStopRecording = async () => {
           lines.push('(No messages in this conversation)');
           lines.push('');
         }
-        
+
         lines.push('='.repeat(60));
         lines.push('');
       });
@@ -812,23 +818,23 @@ const handleStopRecording = async () => {
       lines.push('Your AI Language Companion');
 
       const textContent = lines.join('\n');
-      
+
       // Create and trigger download
       const element = document.createElement("a");
       const file = new Blob([textContent], { type: 'text/plain; charset=utf-8' });
       element.href = URL.createObjectURL(file);
-      
+
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
       element.download = `OdiaLingua_All_Chats_${timestamp}.txt`;
-      
+
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
-      
+
       URL.revokeObjectURL(element.href);
-      
+
       toast.success(`Exported ${sessions.length} conversations!`);
-      
+
     } catch (error) {
       console.error('Export all failed:', error);
       toast.error("Failed to export chats");
@@ -841,7 +847,7 @@ const handleStopRecording = async () => {
       const res = await fetch(`${API_BASE_URL}/chats/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch chats");
       const userSessions: Session[] = await res.json();
-      
+
       // Sort sessions by datetime before setting state
       const sortedSessions = sortSessionsByDateTime(userSessions);
       setSessions(sortedSessions);
@@ -855,11 +861,11 @@ const handleStopRecording = async () => {
   const sendMessage = useCallback(async (messageText?: string) => {
     const textToSend = messageText || messageInput.trim();
     if (!textToSend || !user || assistantTyping) return;
-    
+
     const optimisticSessionId = currentSessionId ?? uuidv4();
     const isNewChat = !currentSessionId;
-    const userMessage: Message = { 
-      role: "user", 
+    const userMessage: Message = {
+      role: "user",
       content: textToSend,
       timestamp: Date.now()
     };
@@ -876,9 +882,9 @@ const handleStopRecording = async () => {
 
     // Optimistic updates
     if (isNewChat) {
-      const newSession: Session = { 
-        id: optimisticSessionId, 
-        name: 'New Chat', 
+      const newSession: Session = {
+        id: optimisticSessionId,
+        name: t('chat.newChat'),
         messages: [userMessage],
         lastUpdated: Date.now(),
         createdAt: Date.now()
@@ -886,9 +892,9 @@ const handleStopRecording = async () => {
       setSessions(prev => [newSession, ...prev]);
       setCurrentSessionId(optimisticSessionId);
     } else {
-      setSessions(prev => prev.map(s => 
-        s.id === optimisticSessionId 
-          ? { ...s, messages: [...s.messages, userMessage], lastUpdated: Date.now() } 
+      setSessions(prev => prev.map(s =>
+        s.id === optimisticSessionId
+          ? { ...s, messages: [...s.messages, userMessage], lastUpdated: Date.now() }
           : s
       ));
     }
@@ -909,10 +915,10 @@ const handleStopRecording = async () => {
       });
 
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      
+
       const data = await res.json();
-      const assistantMessage: Message = { 
-        role: "assistant", 
+      const assistantMessage: Message = {
+        role: "assistant",
         content: data.response,
         timestamp: Date.now()
       };
@@ -935,7 +941,7 @@ const handleStopRecording = async () => {
       // TTS for assistant response if enabled
       if (isTTSEnabled && data.response && !isTTSPlaying) {
         setIsTTSPlaying(true);
-        
+
         // Stop any currently playing audio
         if (currentAudio) {
           currentAudio.pause();
@@ -958,22 +964,22 @@ const handleStopRecording = async () => {
             const audioBlob = await ttsResponse.blob();
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
-            
+
             setCurrentAudio(audio);
-            
+
             audio.onended = () => {
               setIsTTSPlaying(false);
               setCurrentAudio(null);
               URL.revokeObjectURL(audioUrl);
             };
-            
+
             audio.onerror = () => {
               setIsTTSPlaying(false);
               setCurrentAudio(null);
               URL.revokeObjectURL(audioUrl);
               console.error('TTS audio playback failed');
             };
-            
+
             await audio.play();
           } else {
             throw new Error(`TTS request failed: ${ttsResponse.status}`);
@@ -988,21 +994,21 @@ const handleStopRecording = async () => {
 
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
-      const errorMessage: Message = { 
-        role: "assistant", 
+      const errorMessage: Message = {
+        role: "assistant",
         content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
         timestamp: Date.now()
       };
-      
-      setSessions(prev => prev.map(s => 
-        s.id === optimisticSessionId 
-          ? { ...s, messages: [...s.messages, errorMessage] } 
+
+      setSessions(prev => prev.map(s =>
+        s.id === optimisticSessionId
+          ? { ...s, messages: [...s.messages, errorMessage] }
           : s
       ));
     } finally {
       setAssistantTyping(false);
     }
-  }, [messageInput, user, currentSessionId, assistantTyping, currentView, isTTSEnabled, isTTSPlaying, currentAudio]);
+  }, [messageInput, user, currentSessionId, assistantTyping, currentView, isTTSEnabled, isTTSPlaying, currentAudio, t]);
 
   // Initialize component
   useEffect(() => {
@@ -1073,17 +1079,17 @@ const handleStopRecording = async () => {
     }
   }, [sendMessage]);
 
-  const currentSession = currentSessionId 
-    ? sessions.find(s => s.id === currentSessionId) 
+  const currentSession = currentSessionId
+    ? sessions.find(s => s.id === currentSessionId)
     : null;
-  
+
   const chatMessages = currentSession?.messages ?? [];
-  const currentChatName = currentSession?.name ?? "New Chat";
+  const currentChatName = currentSession?.name ?? t('chat.newChat');
 
   // Filter sessions based on search
   const filteredSessions = sessions.filter(session =>
     session.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    session.messages.some(msg => 
+    session.messages.some(msg =>
       msg.content.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
@@ -1107,19 +1113,19 @@ const handleStopRecording = async () => {
   const playTTS = useCallback(async (text: string, messageId: string) => {
     try {
       const currentState = ttsStates[messageId];
-      
+
       // If already loading, ignore subsequent clicks
       if (currentState?.isLoading) {
         console.log(`TTS already loading for message ${messageId}, ignoring click`);
         return;
       }
-      
+
       // If currently playing, stop the audio
       if (currentState?.isPlaying && currentState?.audioElement) {
         currentState.audioElement.pause();
         currentState.audioElement.currentTime = 0;
         URL.revokeObjectURL(currentState.audioElement.src);
-        
+
         setTtsStates(prev => ({
           ...prev,
           [messageId]: {
@@ -1133,7 +1139,7 @@ const handleStopRecording = async () => {
 
       // Create abort controller for this request
       const abortController = new AbortController();
-      
+
       // Set loading state
       setTtsStates(prev => ({
         ...prev,
@@ -1168,13 +1174,13 @@ const handleStopRecording = async () => {
         }
 
         const audioBlob = await response.blob();
-        
+
         // Check again if aborted after blob creation
         if (abortController.signal.aborted) {
           console.log("TTS request was aborted after blob creation");
           return;
         }
-        
+
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
 
@@ -1235,7 +1241,7 @@ const handleStopRecording = async () => {
 
       } catch (error: any) {
         toast.dismiss(loadingToast);
-        
+
         if (error.name === 'AbortError') {
           console.log("TTS request was cancelled");
           toast.success("Audio request cancelled");
@@ -1243,7 +1249,7 @@ const handleStopRecording = async () => {
           console.error("TTS error:", error);
           toast.error("Failed to generate audio");
         }
-        
+
         // Reset state on error
         setTtsStates(prev => ({
           ...prev,
@@ -1259,7 +1265,7 @@ const handleStopRecording = async () => {
     } catch (error) {
       console.error("TTS error:", error);
       toast.error("Failed to generate audio");
-      
+
       // Reset state on error
       setTtsStates(prev => ({
         ...prev,
@@ -1291,10 +1297,10 @@ const handleStopRecording = async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId }),
       });
-      
+
       const updatedSessions = sessions.filter(s => s.id !== sessionId);
       setSessions(updatedSessions);
-      
+
       if (sessionId === currentSessionId) {
         if (updatedSessions.length > 0) {
           setCurrentSessionId(updatedSessions[0].id);
@@ -1303,7 +1309,7 @@ const handleStopRecording = async () => {
           startNewChat();
         }
       }
-      
+
       toast.success("Chat deleted");
     } catch (error: any) {
       toast.error(`Failed to delete chat: ${error.message}`);
@@ -1312,17 +1318,17 @@ const handleStopRecording = async () => {
 
   const saveChatName = useCallback(async () => {
     if (!newChatName.trim() || !currentSessionId) return;
-    
+
     try {
       await fetch(`${API_BASE_URL}/rename-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: currentSessionId, name: newChatName.trim() }),
       });
-      
-      setSessions(prev => prev.map(s => 
-        s.id === currentSessionId 
-          ? { ...s, name: newChatName.trim(), lastUpdated: Date.now() } 
+
+      setSessions(prev => prev.map(s =>
+        s.id === currentSessionId
+          ? { ...s, name: newChatName.trim(), lastUpdated: Date.now() }
           : s
       ));
       setShowRenameModal(false);
@@ -1351,7 +1357,7 @@ const handleStopRecording = async () => {
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -1372,7 +1378,7 @@ const handleStopRecording = async () => {
               </div>
               <span className="font-bold text-lg sm:text-xl text-gradient">OdiaLingua</span>
             </Link>
-            
+
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <DropdownMenu>
@@ -1382,8 +1388,11 @@ const handleStopRecording = async () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Settings</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t('chat.settings')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <LanguageToggle />
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
                       if (currentSession) {
@@ -1394,12 +1403,12 @@ const handleStopRecording = async () => {
                     }}
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Export Chat{sessions.length > 1 ? 's' : ''}
+                    {t('chat.export')}{sessions.length > 1 ? 's' : ''}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    {t('chat.signOut')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1421,7 +1430,7 @@ const handleStopRecording = async () => {
             className="w-full btn-gradient rounded-xl py-2 sm:py-3 text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-            New Chat
+            {t('chat.newChat')}
           </Button>
         </div>
 
@@ -1431,7 +1440,7 @@ const handleStopRecording = async () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder={t('chat.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 sm:pl-10 pr-4 py-2 rounded-lg border border-border/50 bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-xs sm:text-sm"
@@ -1445,13 +1454,13 @@ const handleStopRecording = async () => {
             {filteredSessions.length === 0 ? (
               <div className="text-center py-8 sm:py-12">
                 <MessageCircle className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3 sm:mb-4 opacity-50" />
-                <p className="text-xs sm:text-sm text-muted-foreground">No conversations yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Start a new chat to begin</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('chat.noConversations')}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('chat.startAConversation')}</p>
               </div>
             ) : (
               <>
                 <h3 className="text-xs font-medium text-muted-foreground mb-2 sm:mb-3 px-2">
-                  Recent Conversations
+                  {t('chat.recentConversations')}
                 </h3>
                 {filteredSessions
                   .map((session) => (
@@ -1513,7 +1522,7 @@ const handleStopRecording = async () => {
               >
                 <Menu className="w-4 h-4" />
               </Button>
-              
+
               {currentView === 'chat' && currentSession && (
                 <>
                   <Button
@@ -1527,16 +1536,16 @@ const handleStopRecording = async () => {
                   <Separator orientation="vertical" className="h-4 sm:h-6 hidden sm:block" />
                 </>
               )}
-              
+
               <h1 className="font-semibold text-sm sm:text-lg truncate">
-                {currentView === 'welcome' ? 'Welcome' : currentChatName}
+                {currentView === 'welcome' ? t('chat.welcome') : currentChatName}
               </h1>
             </div>
 
             <div className="flex items-center gap-2">
               {currentView === 'chat' && currentSession && (
                 <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
-                  {chatMessages.length} messages
+                  {chatMessages.length} {t('chat.messages')}
                 </Badge>
               )}
             </div>
@@ -1545,8 +1554,8 @@ const handleStopRecording = async () => {
 
         {/* Content Area */}
         {currentView === 'welcome' ? (
-          <WelcomeScreen 
-            userName={user?.name || user?.email || 'Friend'} 
+          <WelcomeScreen
+            userName={user?.name || user?.email || 'Friend'}
             onStartChat={startChatFromWelcome}
           />
         ) : (
@@ -1578,7 +1587,7 @@ const handleStopRecording = async () => {
                         onCopy={copyText}
                       />
                     ))}
-                    
+
                     {assistantTyping && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -1593,7 +1602,7 @@ const handleStopRecording = async () => {
                         </div>
                       </motion.div>
                     )}
-                    
+
                     <div ref={messagesEndRef} />
                   </>
                 )}
@@ -1665,11 +1674,11 @@ const handleStopRecording = async () => {
                       ref={inputRef}
                       className="w-full max-h-24 sm:max-h-32 p-3 sm:p-4 pr-16 sm:pr-20 rounded-2xl border border-border/50 bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 placeholder:text-muted-foreground text-sm sm:text-base"
                       placeholder={
-                        isRecording 
-                          ? "Listening..." 
-                          : isTranscribing 
-                            ? "Transcribing..." 
-                            : "Type your message or click mic to speak... (Press Enter to send)"
+                        isRecording
+                          ? "Listening..."
+                          : isTranscribing
+                            ? "Transcribing..."
+                            : t('chat.placeholder')
                       }
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
@@ -1695,7 +1704,7 @@ const handleStopRecording = async () => {
                       />
                     </div>
                   </div>
-                  
+
                   <Button
                     onClick={() => sendMessage()}
                     disabled={!messageInput.trim() || assistantTyping || isRecording || isTranscribing}
@@ -1714,7 +1723,7 @@ const handleStopRecording = async () => {
                     )}
                   </Button>
                 </div>
-                
+
                 {/* Enhanced Footer Info */}
                 <div className="flex items-center justify-center mt-3 sm:mt-4 gap-3 sm:gap-6 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1 sm:gap-2">
@@ -1748,9 +1757,9 @@ const handleStopRecording = async () => {
       <Dialog open={showRenameModal} onOpenChange={setShowRenameModal}>
         <DialogContent className="max-w-sm sm:max-w-lg mx-4">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Rename Conversation</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">{t('chat.rename')}</DialogTitle>
             <DialogDescription className="text-sm sm:text-base">
-              Give your conversation a memorable name
+              {t('chat.renameDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -1759,23 +1768,23 @@ const handleStopRecording = async () => {
               value={newChatName}
               onChange={(e) => setNewChatName(e.target.value)}
               className="w-full p-3 rounded-xl border border-border/50 bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-              placeholder="Enter conversation name"
+              placeholder={t('chat.renamePlaceholder')}
               onKeyDown={(e) => e.key === 'Enter' && saveChatName()}
             />
             <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => setShowRenameModal(false)}
                 className="order-2 sm:order-1"
               >
-                Cancel
+                {t('chat.cancel')}
               </Button>
-              <Button 
-                onClick={saveChatName} 
+              <Button
+                onClick={saveChatName}
                 disabled={!newChatName.trim()}
                 className="order-1 sm:order-2"
               >
-                Save
+                {t('chat.save')}
               </Button>
             </div>
           </div>

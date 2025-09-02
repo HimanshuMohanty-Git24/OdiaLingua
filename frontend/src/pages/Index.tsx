@@ -1,8 +1,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Brain, MessageSquare, Globe, ArrowRight, Users, BookOpen, 
-  GraduationCap, Building2, Globe2, Star, TrendingUp, 
+import {
+  Brain, MessageSquare, Globe, ArrowRight, Users, BookOpen,
+  GraduationCap, Building2, Globe2, Star, TrendingUp,
   Shield, Zap, Heart, Award, ChevronRight, Play, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageToggle } from '@/components/LanguageToggle'
 import {
   Carousel,
   CarouselContent,
@@ -17,46 +18,48 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
+import { useTranslation } from 'react-i18next'
 
 const Index = () => {
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const { t } = useTranslation()
 
   const features = [
     {
       icon: <Brain className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "AI-Powered Conversations",
-      description: "Experience natural, context-aware conversations in Odia with our advanced language model",
+      title: t('features.aiConversations.title'),
+      description: t('features.aiConversations.description'),
       gradient: "from-blue-500 to-cyan-500"
     },
     {
       icon: <Globe className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "Real-Time Information",
-      description: "Get instant access to current information with integrated search capabilities",
+      title: t('features.realTimeInfo.title'),
+      description: t('features.realTimeInfo.description'),
       gradient: "from-green-500 to-emerald-500"
     },
     {
       icon: <MessageSquare className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "Native Speech Synthesis",
-      description: "Listen to authentic Odia pronunciation with our advanced text-to-speech technology",
+      title: t('features.speechSynthesis.title'),
+      description: t('features.speechSynthesis.description'),
       gradient: "from-purple-500 to-pink-500"
     },
     {
       icon: <Shield className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "Privacy First",
-      description: "Your conversations are secure and private with end-to-end encryption",
+      title: t('features.privacy.title'),
+      description: t('features.privacy.description'),
       gradient: "from-orange-500 to-red-500"
     },
     {
       icon: <Zap className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "Lightning Fast",
-      description: "Powered by cutting-edge infrastructure for instant responses",
+      title: t('features.fast.title'),
+      description: t('features.fast.description'),
       gradient: "from-yellow-500 to-orange-500"
     },
     {
       icon: <Heart className='w-5 h-5 sm:w-6 sm:h-6' />,
-      title: "Cultural Preservation",
-      description: "Helping preserve and promote the beautiful Odia language and culture",
+      title: t('features.culturalPreservation.title'),
+      description: t('features.culturalPreservation.description'),
       gradient: "from-pink-500 to-rose-500"
     }
   ]
@@ -132,7 +135,7 @@ const Index = () => {
             >
               OdiaLingua
             </motion.div>
-            
+
             {/* Desktop Navigation */}
             <div className='hidden md:flex items-center gap-4'>
               <Button
@@ -140,21 +143,23 @@ const Index = () => {
                 className='text-muted-foreground hover:text-foreground'
                 onClick={() => navigate('/contact')}
               >
-                Contact
+                {t('contact')}
               </Button>
               <ThemeToggle />
+              <LanguageToggle />
               <Button
                 size="sm"
                 className='btn-gradient'
                 onClick={() => navigate('/login')}
               >
-                Get Started
+                {t('getStarted')}
               </Button>
             </div>
 
             {/* Mobile Navigation */}
             <div className='md:hidden flex items-center gap-2'>
               <ThemeToggle />
+              <LanguageToggle />
               <Button
                 variant="ghost"
                 size="sm"
@@ -182,7 +187,7 @@ const Index = () => {
                   setMobileMenuOpen(false)
                 }}
               >
-                Contact
+                {t('contact')}
               </Button>
               <Button
                 className='w-full btn-gradient'
@@ -191,7 +196,7 @@ const Index = () => {
                   setMobileMenuOpen(false)
                 }}
               >
-                Get Started
+                {t('getStarted')}
               </Button>
             </motion.div>
           )}
@@ -231,9 +236,9 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-4 sm:mb-6"
             >
-              <span className="block">The First</span>
-              <span className="block text-gradient">AI-Native</span>
-              <span className="block">Odia Experience</span>
+              <span className="block">{t('hero.title1')}</span>
+              <span className="block text-gradient">{t('hero.title2')}</span>
+              <span className="block">{t('hero.title3')}</span>
             </motion.h1>
 
             {/* Subtitle */}
@@ -243,8 +248,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed font-light px-4"
             >
-              Revolutionary AI technology meets the rich heritage of Odia language. 
-              Chat naturally, learn effortlessly, and explore without limits.
+              {t('hero.subtitle')}
             </motion.p>
 
             {/* CTA Section */}
@@ -260,8 +264,8 @@ const Index = () => {
                 onClick={() => navigate('/login')}
               >
                 <Play className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline">Start Speaking Odia</span>
-                <span className="sm:hidden">Get Started</span>
+                <span className="hidden sm:inline">{t('hero.cta1')}</span>
+                <span className="sm:hidden">{t('getStarted')}</span>
                 <ArrowRight className="ml-2 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
               <Button
@@ -270,7 +274,7 @@ const Index = () => {
                 className="text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl border-2 hover:bg-primary/5 transition-all duration-300"
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                <span className="hidden sm:inline">Explore Features</span>
+                <span className="hidden sm:inline">{t('hero.cta2')}</span>
                 <span className="sm:hidden">Features</span>
                 <ChevronRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
@@ -432,7 +436,7 @@ const Index = () => {
       <section className="py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10" />
         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(99,102,241,0.1)_50%,transparent_75%)] bg-[length:20px_20px]" />
-        
+
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -483,13 +487,13 @@ const Index = () => {
                 Preserving culture through innovation
               </p>
             </div>
-            
+
             <div className="flex items-center gap-6 sm:gap-8">
               <button
                 onClick={() => navigate('/contact')}
                 className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors"
               >
-                Contact
+                {t('contact')}
               </button>
               <a
                 href="https://github.com/HimanshuMohanty-Git24"
@@ -501,7 +505,7 @@ const Index = () => {
               </a>
             </div>
           </div>
-          
+
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border/50 text-center">
             <p className="text-xs sm:text-sm text-muted-foreground">
               Made with ❤️ by{' '}
