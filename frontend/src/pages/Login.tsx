@@ -7,11 +7,13 @@ import { loginWithGoogle, getUser } from "@/auth";
 import { toast } from "react-hot-toast";
 import { ArrowLeft, Chrome, Sparkles, Shield, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkExistingAuth = async () => {
@@ -35,7 +37,7 @@ const Login = () => {
     if (isLoading) return;
 
     setIsLoading(true);
-    
+
     try {
       toast.loading("Connecting to Google...", { id: "login" });
       await loginWithGoogle();
@@ -64,18 +66,18 @@ const Login = () => {
   const benefits = [
     {
       icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "AI-Powered Conversations",
-      description: "Chat naturally in Odia with advanced AI"
+      title: t("login.feature1.title"),
+      description: t("login.feature1.description")
     },
     {
       icon: <Shield className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Secure & Private",
-      description: "Your data is protected with enterprise-grade security"
+      title: t("login.feature2.title"),
+      description: t("login.feature2.description")
     },
     {
       icon: <Zap className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Lightning Fast",
-      description: "Instant responses powered by cutting-edge technology"
+      title: t("login.feature3.title"),
+      description: t("login.feature3.description")
     }
   ];
 
@@ -118,18 +120,17 @@ const Login = () => {
                 className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 mb-4 sm:mb-6 bg-primary/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary backdrop-blur-sm"
               >
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="hidden sm:inline">Ready to experience the future</span>
-                <span className="sm:hidden">Ready to start</span>
+                <span className="hidden sm:inline">{t('login.title')}</span>
+                <span className="sm:hidden">{t('getStarted')}</span>
               </motion.div>
-              
+
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
-                <span className="block">Welcome to</span>
+                <span className="block">{t('login.welcome')}</span>
                 <span className="block text-gradient">OdiaLingua</span>
               </h1>
-              
+
               <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed mb-6 sm:mb-8 max-w-xl">
-                Start your journey with the world's first AI-powered Odia language platform. 
-                Connect with your heritage through technology.
+                {t('login.subtitle')}
               </p>
             </div>
 
@@ -165,9 +166,9 @@ const Login = () => {
             <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl">
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-6 sm:mb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-2">Sign in to continue</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2">{t('login.signIn')}</h2>
                   <p className="text-sm sm:text-base text-muted-foreground">
-                    One click to unlock the future of Odia language
+                    {t('login.oneClick')}
                   </p>
                 </div>
 
@@ -193,7 +194,7 @@ const Login = () => {
                       ) : (
                         <>
                           <Chrome className="w-4 h-4 sm:w-5 sm:h-5 mr-3" />
-                          <span>Continue with Google</span>
+                          <span>{t('login.continueWithGoogle')}</span>
                         </>
                       )}
                     </Button>
@@ -202,9 +203,9 @@ const Login = () => {
 
                 <div className="mt-6 sm:mt-8 text-center">
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    By signing in, you agree to our Terms of Service and Privacy Policy.
+                    {t('login.terms')}
                     <br className="hidden sm:block" />
-                    Your data is secure and never shared with third parties.
+                    {t('login.dataSecure')}
                   </p>
                 </div>
 
@@ -212,17 +213,17 @@ const Login = () => {
                 <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Shield className="w-3 h-3" />
-                    <span>Secure</span>
+                    <span>{t('login.badgeSecure')}</span>
                   </div>
                   <div className="w-1 h-1 bg-muted-foreground rounded-full" />
                   <div className="flex items-center gap-1">
                     <Zap className="w-3 h-3" />
-                    <span>Fast</span>
+                    <span>{t('login.badgeFast')}</span>
                   </div>
                   <div className="w-1 h-1 bg-muted-foreground rounded-full" />
                   <div className="flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    <span>Modern</span>
+                    <span>{t('login.badgeModern')}</span>
                   </div>
                 </div>
               </CardContent>

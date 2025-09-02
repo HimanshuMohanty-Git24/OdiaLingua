@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next'
 const Index = () => {
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const features = [
     {
@@ -116,10 +116,10 @@ const Index = () => {
   ]
 
   const stats = [
-    { number: "10,000+", label: "Active Users", icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "500K+", label: "Conversations", icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "25+", label: "Countries", icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "99.9%", label: "Uptime", icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
+    { number: "10,000+", label: t("index.stats.activeUsers"), icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: "500K+", label: t("index.stats.conversations"), icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: "25+", label: t("index.stats.countries"), icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: "99.9%", label: t("index.stats.uptime"), icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
   ]
 
   return (
@@ -133,7 +133,7 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               className='font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent'
             >
-              OdiaLingua
+              {t('logo')}
             </motion.div>
 
             {/* Desktop Navigation */}
@@ -318,13 +318,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Powerful Features
+              {t('index.features.badge')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Why Choose <span className="text-gradient">OdiaLingua</span>?
+              {t('index.features.title')} <span className="text-gradient">OdiaLingua</span>?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Experience the perfect blend of cutting-edge AI technology and deep cultural understanding
+              {t('index.features.subtitle')}
             </p>
           </motion.div>
 
@@ -369,13 +369,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Testimonials
+              {t('index.testimonials.badge')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Loved by <span className="text-gradient">Thousands</span> Worldwide
+              {t('index.testimonials.title')}
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Join our growing community of global learners discovering the beauty of Odia language
+              {t('index.testimonials.subtitle')}
             </p>
           </motion.div>
 
@@ -445,12 +445,12 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
-              Ready to Begin Your
+              {t('index.cta.title1')}
               <br />
-              <span className="text-gradient">Odia Journey?</span>
+              <span className="text-gradient">{t('index.cta.title2')}</span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Join thousands of users already experiencing the future of language technology
+              {t('index.cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Button
@@ -458,8 +458,8 @@ const Index = () => {
                 className="btn-gradient text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
                 onClick={() => navigate('/login')}
               >
-                <span className="hidden sm:inline">Start Free Today</span>
-                <span className="sm:hidden">Start Free</span>
+                <span className="hidden sm:inline">{t('index.cta.button1')}</span>
+                <span className="sm:hidden">{t('getStarted')}</span>
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
               <Button
@@ -468,7 +468,7 @@ const Index = () => {
                 className="text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl"
                 onClick={() => navigate('/contact')}
               >
-                Contact Us
+                {t('index.cta.button2')}
               </Button>
             </div>
           </motion.div>
@@ -481,10 +481,10 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8">
             <div className="text-center md:text-left">
               <div className="font-display text-xl sm:text-2xl font-bold text-gradient mb-2">
-                OdiaLingua
+                {t('logo')}
               </div>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Preserving culture through innovation
+                {t('index.footer.subtitle')}
               </p>
             </div>
 
@@ -501,22 +501,14 @@ const Index = () => {
                 rel="noopener noreferrer"
                 className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors"
               >
-                GitHub
+                {t('index.footer.github')}
               </a>
             </div>
           </div>
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border/50 text-center">
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Made with ❤️ by{' '}
-              <a
-                href="https://github.com/HimanshuMohanty-Git24"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Himanshu Mohanty
-              </a>
+              {t('index.footer.madeWith')}
             </p>
           </div>
         </div>

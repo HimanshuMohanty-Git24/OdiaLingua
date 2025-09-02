@@ -210,10 +210,10 @@ const WelcomeScreen = ({ userName, onStartChat }: {
 }) => {
   const { t } = useTranslation();
   const suggestions = [
-    "Tell me about Odia culture and traditions",
-    "Help me learn Odia language basics",
-    "What are famous places in Odisha?",
-    "Explain Jagannath temple history"
+    t("chat.welcomeScreen.suggestions.s1"),
+    t("chat.welcomeScreen.suggestions.s2"),
+    t("chat.welcomeScreen.suggestions.s3"),
+    t("chat.welcomeScreen.suggestions.s4")
   ];
 
   return (
@@ -1376,7 +1376,7 @@ const handleStopRecording = async () => {
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
                 <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <span className="font-bold text-lg sm:text-xl text-gradient">OdiaLingua</span>
+              <span className="font-bold text-lg sm:text-xl text-gradient">{t('logo')}</span>
             </Link>
 
             <div className="flex items-center gap-2">
