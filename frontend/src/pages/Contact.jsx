@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  Github, 
-  Twitter, 
-  Globe, 
-  Linkedin, 
-  Send, 
+import {
+  Mail,
+  Github,
+  Twitter,
+  Globe,
+  Linkedin,
+  Send,
   ArrowLeft,
   MessageSquare,
   Heart,
@@ -21,8 +21,10 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import toast from 'react-hot-toast';
+import { useTranslation } from "react-i18next";
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     subject: '',
     message: ''
@@ -38,14 +40,14 @@ const Contact = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Simulate form submission
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mailtoLink = `mailto:codehimanshu24@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(formData.message)}`;
       window.location.href = mailtoLink;
-      
+
       toast.success('Email client opened successfully!');
       setFormData({ subject: '', message: '' });
     } catch (error) {
@@ -66,48 +68,48 @@ const Contact = () => {
     {
       icon: <Github className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://github.com/HimanshuMohanty-Git24",
-      label: "GitHub",
+      label: t("contactPage.connectWithMe.github"),
       color: "hover:text-gray-900 dark:hover:text-gray-100",
-      description: "Open source projects"
+      description: t("contactPage.connectWithMe.githubSubtitle")
     },
     {
       icon: <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://twitter.com/CodingHima",
-      label: "Twitter",
+      label: t("contactPage.connectWithMe.twitter"),
       color: "hover:text-blue-500",
-      description: "Latest updates & thoughts"
+      description: t("contactPage.connectWithMe.twitterSubtitle")
     },
     {
       icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://himanshumohanty.netlify.app/",
-      label: "Portfolio",
+      label: t("contactPage.connectWithMe.portfolio"),
       color: "hover:text-green-600",
-      description: "My work & projects"
+      description: t("contactPage.connectWithMe.portfolioSubtitle")
     },
     {
       icon: <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://www.linkedin.com/in/himanshumohanty/",
-      label: "LinkedIn",
+      label: t("contactPage.connectWithMe.linkedin"),
       color: "hover:text-blue-600",
-      description: "Professional network"
+      description: t("contactPage.connectWithMe.linkedinSubtitle")
     },
   ];
 
   const features = [
     {
       icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Quick Response",
-      description: "I typically respond within 24 hours"
+      title: t("contactPage.quickResponse.title"),
+      description: t("contactPage.quickResponse.description")
     },
     {
       icon: <Heart className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Open to Collaborate",
-      description: "Always excited about new projects"
+      title: t("contactPage.openToCollaborate.title"),
+      description: t("contactPage.openToCollaborate.description")
     },
     {
       icon: <Star className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Quality Focus",
-      description: "Committed to delivering excellence"
+      title: t("contactPage.qualityFocus.title"),
+      description: t("contactPage.qualityFocus.description")
     }
   ];
 
@@ -117,15 +119,15 @@ const Contact = () => {
       <nav className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14 sm:h-16">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 sm:gap-3 font-display text-lg sm:text-xl font-bold text-foreground hover:text-primary transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span className="hidden sm:inline">OdiaLingua</span>
+              <span className="hidden sm:inline">{t('logo')}</span>
               <span className="sm:hidden">Back</span>
             </Link>
-            
+
             {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center">
               <ThemeToggle />
@@ -168,21 +170,20 @@ const Contact = () => {
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 mb-6 sm:mb-8 bg-primary/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary backdrop-blur-sm"
             >
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="hidden sm:inline">Available for new opportunities</span>
+              <span className="hidden sm:inline">{t('contactPage.title')}</span>
               <span className="sm:hidden">Available</span>
             </motion.div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
-              <span className="block">Let's Build</span>
-              <span className="block text-gradient">Something Amazing</span>
-              <span className="block">Together</span>
+              <span className="block">{t('contactPage.heading')}</span>
+              <span className="block text-gradient">{t('contactPage.heading2')}</span>
+              <span className="block">{t('contactPage.heading3')}</span>
             </h1>
-            
+
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed mb-8 sm:mb-12 max-w-3xl mx-auto px-4">
-              Hi, I'm <span className="font-semibold text-foreground">Himanshu Mohanty</span> 👋
+              {t('contactPage.greeting')}
               <br className="hidden sm:block" />
-              Thank you for your interest in OdiaLingua! I'm always excited to connect with fellow developers, 
-              language enthusiasts, and anyone passionate about preserving culture through technology.
+              {t('contactPage.intro')}
             </p>
 
             {/* Quick features */}
@@ -224,19 +225,18 @@ const Contact = () => {
                   <div className="mb-6 sm:mb-8">
                     <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
                       <Mail className="w-3 h-3 mr-2" />
-                      Get in Touch
+                      {t('contactPage.getInTouch.title')}
                     </Badge>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Send me a message</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">{t('contactPage.getInTouch.subtitle')}</h2>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      Have a question, collaboration idea, or just want to say hello? 
-                      I'd love to hear from you!
+                      {t('contactPage.getInTouch.intro')}
                     </p>
                   </div>
 
                   <form onSubmit={handleEmailSubmit} className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                        Subject
+                        {t('contactPage.getInTouch.subject')}
                       </label>
                       <input
                         type="text"
@@ -245,14 +245,14 @@ const Contact = () => {
                         value={formData.subject}
                         onChange={handleInputChange}
                         className="w-full rounded-xl border border-input bg-background px-3 sm:px-4 py-2 sm:py-3 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        placeholder="What's this about?"
+                        placeholder={t('contactPage.getInTouch.subjectPlaceholder')}
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                        Message
+                        {t('contactPage.getInTouch.message')}
                       </label>
                       <textarea
                         name="message"
@@ -261,13 +261,13 @@ const Contact = () => {
                         value={formData.message}
                         onChange={handleInputChange}
                         className="w-full rounded-xl border border-input bg-background px-3 sm:px-4 py-2 sm:py-3 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
-                        placeholder="Tell me more about your project, question, or just say hi!"
+                        placeholder={t('contactPage.getInTouch.messagePlaceholder')}
                         required
                       />
                     </div>
-                    
-                    <Button 
-                      type="submit" 
+
+                    <Button
+                      type="submit"
                       className="w-full btn-gradient text-sm sm:text-base py-4 sm:py-6 rounded-xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
                       disabled={isSubmitting}
                     >
@@ -279,7 +279,7 @@ const Contact = () => {
                       ) : (
                         <>
                           <Send className="w-4 h-4 mr-2" />
-                          Send Message
+                          {t('contactPage.getInTouch.sendMessage')}
                         </>
                       )}
                     </Button>
@@ -299,10 +299,10 @@ const Contact = () => {
               <div>
                 <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
                   <Heart className="w-3 h-3 mr-2" />
-                  Connect with me
+                  {t('contactPage.connectWithMe.title')}
                 </Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Let's stay connected</h2>
-                
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">{t('contactPage.connectWithMe.subtitle')}</h2>
+
                 <div className="grid gap-3 sm:gap-4">
                   {socialLinks.map((link, index) => (
                     <motion.a
@@ -335,24 +335,24 @@ const Contact = () => {
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                    <h3 className="font-semibold text-sm sm:text-base">Quick Facts</h3>
+                    <h3 className="font-semibold text-sm sm:text-base">{t('contactPage.quickFacts.title')}</h3>
                   </div>
                   <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Based in Odisha, India 🇮🇳
+                      {t('contactPage.quickFacts.fact1')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Full-stack developer with AI/ML expertise
+                      {t('contactPage.quickFacts.fact2')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Passionate about language preservation
+                      {t('contactPage.quickFacts.fact3')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Open to remote collaborations
+                      {t('contactPage.quickFacts.fact4')}
                     </li>
                   </ul>
                 </CardContent>
@@ -367,7 +367,7 @@ const Contact = () => {
         <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="text-center text-xs sm:text-sm text-muted-foreground">
             <p>
-              Built with ❤️ using React, TypeScript, and modern web technologies
+              {t('contactPage.quickFacts.fact5')}
             </p>
           </div>
         </div>

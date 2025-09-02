@@ -1,0 +1,177 @@
+{
+  "greeting": "Hello, World!",
+  "contact": "Contact",
+  "getStarted": "Get Started",
+  "pageTitle": "OdiaLingua - AI-Powered Odia Language Platform | Chat, Learn, Explore",
+  "logo": "OdiaLingua",
+  "features": {
+    "aiConversations": {
+      "title": "AI-Powered Conversations",
+      "description": "Experience natural, context-aware conversations in Odia with our advanced language model"
+    },
+    "realTimeInfo": {
+      "title": "Real-Time Information",
+      "description": "Get instant access to current information with integrated search capabilities"
+    },
+    "speechSynthesis": {
+      "title": "Native Speech Synthesis",
+      "description": "Listen to authentic Odia pronunciation with our advanced text-to-speech technology"
+    },
+    "privacy": {
+      "title": "Privacy First",
+      "description": "Your conversations are secure and private with end-to-end encryption"
+    },
+    "fast": {
+      "title": "Lightning Fast",
+      "description": "Powered by cutting-edge infrastructure for instant responses"
+    },
+    "culturalPreservation": {
+      "title": "Cultural Preservation",
+      "description": "Helping preserve and promote the beautiful Odia language and culture"
+    }
+  },
+  "hero": {
+    "title1": "The First",
+    "title2": "AI-Native",
+    "title3": "Odia Experience",
+    "subtitle": "Revolutionary AI technology meets the rich heritage of Odia language. Chat naturally, learn effortlessly, and explore without limits.",
+    "cta1": "Start Speaking Odia",
+    "cta2": "Explore Features"
+  },
+  "index": {
+    "stats": {
+      "activeUsers": "Active Users",
+      "conversations": "Conversations",
+      "countries": "Countries",
+      "uptime": "Uptime"
+    },
+    "features": {
+      "badge": "Powerful Features",
+      "title": "Why Choose OdiaLingua?",
+      "subtitle": "Experience the perfect blend of cutting-edge AI technology and deep cultural understanding"
+    },
+    "testimonials": {
+      "badge": "Testimonials",
+      "title": "Loved by Thousands Worldwide",
+      "subtitle": "Join our growing community of global learners discovering the beauty of Odia language"
+    },
+    "cta": {
+      "title1": "Ready to Begin Your",
+      "title2": "Odia Journey?",
+      "subtitle": "Join thousands of users already experiencing the future of language technology",
+      "button1": "Start Free Today",
+      "button2": "Contact Us"
+    },
+    "footer": {
+      "subtitle": "Preserving culture through innovation",
+      "github": "GitHub",
+      "madeWith": "Made with ❤️ by Himanshu Mohanty"
+    }
+  },
+  "login": {
+    "title": "Ready to experience the future",
+    "welcome": "Welcome to OdiaLingua",
+    "subtitle": "Start your journey with the world's first AI-powered Odia language platform. Connect with your heritage through technology.",
+    "feature1": {
+      "title": "AI-Powered Conversations",
+      "description": "Chat naturally in Odia with advanced AI"
+    },
+    "feature2": {
+      "title": "Secure & Private",
+      "description": "Your data is protected with enterprise-grade security"
+    },
+    "feature3": {
+      "title": "Lightning Fast",
+      "description": "Instant responses powered by cutting-edge technology"
+    },
+    "signIn": "Sign in to continue",
+    "oneClick": "One click to unlock the future of Odia language",
+    "continueWithGoogle": "Continue with Google",
+    "terms": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+    "dataSecure": "Your data is secure and never shared with third parties.",
+    "badgeSecure": "Secure",
+    "badgeFast": "Fast",
+    "badgeModern": "Modern"
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "search": "Search conversations...",
+    "recentConversations": "Recent Conversations",
+    "noConversations": "No conversations yet",
+    "startAConversation": "Start a new chat to begin",
+    "welcome": "Welcome",
+    "messages": "messages",
+    "hello": "Hello,",
+    "companion": "I'm your AI companion for exploring the beautiful Odia language. What would you like to talk about today?",
+    "startConversation": "Start Conversation",
+    "thinking": "AI is thinking...",
+    "sendMessage": "Send",
+    "placeholder": "Type your message or click mic to speak... (Press Enter to send)",
+    "rename": "Rename Conversation",
+    "renameDescription": "Give your conversation a memorable name",
+    "renamePlaceholder": "Enter conversation name",
+    "cancel": "Cancel",
+    "save": "Save",
+    "signOut": "Sign Out",
+    "export": "Export Chat",
+    "settings": "Settings",
+    "welcomeScreen": {
+        "suggestions": {
+            "s1": "Tell me about Odia culture and traditions",
+            "s2": "Help me learn Odia language basics",
+            "s3": "What are famous places in Odisha?",
+            "s4": "Explain Jagannath temple history"
+        }
+    }
+  },
+  "contactPage": {
+    "title": "Available for new opportunities",
+    "heading": "Let's Build",
+    "heading2": "Something Amazing",
+    "heading3": "Together",
+    "greeting": "Hi, I'm Himanshu Mohanty 👋",
+    "intro": "Thank you for your interest in OdiaLingua! I'm always excited to connect with fellow developers, language enthusiasts, and anyone passionate about preserving culture through technology.",
+    "quickResponse": {
+        "title": "Quick Response",
+        "description": "I typically respond within 24 hours"
+    },
+    "openToCollaborate": {
+        "title": "Open to Collaborate",
+        "description": "Always excited about new projects"
+    },
+    "qualityFocus": {
+        "title": "Quality Focus",
+        "description": "Committed to delivering excellence"
+    },
+    "getInTouch": {
+        "title": "Get in Touch",
+        "subtitle": "Send me a message",
+        "intro": "Have a question, collaboration idea, or just want to say hello? I'd love to hear from you!",
+        "subject": "Subject",
+        "subjectPlaceholder": "What's this about?",
+        "message": "Message",
+        "messagePlaceholder": "Tell me more about your project, question, or just say hi!",
+        "sendMessage": "Send Message"
+    },
+    "connectWithMe": {
+        "title": "Connect with me",
+        "subtitle": "Let's stay connected",
+        "github": "GitHub",
+        "githubSubtitle": "Open source projects",
+        "twitter": "Twitter",
+        "twitterSubtitle": "Latest updates & thoughts",
+        "portfolio": "Portfolio",
+        "portfolioSubtitle": "My work & projects",
+        "linkedin": "LinkedIn",
+        "linkedinSubtitle": "Professional network"
+    },
+    "quickFacts": {
+        "title": "Quick Facts",
+        "fact1": "Based in Odisha, India 🇮🇳",
+        "fact2": "Full-stack developer with AI/ML expertise",
+        "fact3": "Passionate about language preservation",
+        "fact4": "Open to remote collaborations",
+        "fact5": "Built with ❤️ using React, TypeScript, and modern web technologies"
+    }
+  }
+}

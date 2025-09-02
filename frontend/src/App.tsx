@@ -9,6 +9,7 @@ import NotFound from './pages/NotFound'
 import ChatUI from './components/ChatUI'
 import { getUser } from './auth'
 import { Models } from 'appwrite'
+import { usePageTitle } from './hooks/usePageTitle'
 
 // Enhanced loading component with theme support
 const LoadingSpinner = () => (
@@ -57,6 +58,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 function App() {
+  usePageTitle();
   return (
     <BrowserRouter>
       <Routes>
@@ -64,23 +66,23 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
-        
+
         {/* Protected routes */}
-        <Route 
-          path="/chat" 
+        <Route
+          path="/chat"
           element={
             <ProtectedRoute>
               <ChatUI />
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         {/* 404 route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      
+
       {/* Modern toast notifications */}
-      <Toaster 
+      <Toaster
         position="top-right"
         gutter={8}
         toastOptions={{
