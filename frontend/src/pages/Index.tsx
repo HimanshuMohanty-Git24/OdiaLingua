@@ -3,14 +3,14 @@ import { motion } from 'framer-motion'
 import {
   Brain, MessageSquare, Globe, ArrowRight, Users, BookOpen,
   GraduationCap, Building2, Globe2, Star, TrendingUp,
-  Shield, Zap, Heart, Award, ChevronRight, Play, Menu, X
+  Shield, Zap, Heart, Award, ChevronRight, Play
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
-import { ThemeToggle } from '@/components/layout/ThemeToggle'
-import { LanguageToggle } from '@/components/LanguageToggle'
+import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import {
   Carousel,
   CarouselContent,
@@ -19,11 +19,11 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { useTranslation } from 'react-i18next'
+import { localizeNumber } from '@/lib/localization'
 
 const Index = () => {
   const navigate = useNavigate()
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation('home')
 
   const features = [
     {
@@ -66,49 +66,49 @@ const Index = () => {
 
   const testimonials = [
     {
-      quote: "OdiaLingua has revolutionized how I connect with my roots. The AI understands context beautifully!",
-      author: "Priya Sharma",
-      role: "Software Engineer, San Francisco",
+      quote: t('testimonials.t1.quote'),
+      author: t('testimonials.t1.author'),
+      role: t('testimonials.t1.role'),
       avatar: "PS",
       rating: 5,
       icon: <Users className='w-4 h-4' />
     },
     {
-      quote: "As a researcher studying Odia literature, this tool has been invaluable for my work.",
-      author: "Dr. Rajesh Patel",
-      role: "Academic Researcher, Oxford",
+      quote: t('testimonials.t2.quote'),
+      author: t('testimonials.t2.author'),
+      role: t('testimonials.t2.role'),
       avatar: "RP",
       rating: 5,
       icon: <BookOpen className='w-4 h-4' />
     },
     {
-      quote: "The pronunciation feature helped me maintain my language skills while studying abroad.",
-      author: "Ananya Das",
-      role: "Graduate Student, MIT",
+      quote: t('testimonials.t3.quote'),
+      author: t('testimonials.t3.author'),
+      role: t('testimonials.t3.role'),
       avatar: "AD",
       rating: 5,
       icon: <GraduationCap className='w-4 h-4' />
     },
     {
-      quote: "Perfect for our business communications in Odisha. Professional and reliable.",
-      author: "Michael Chen",
-      role: "Business Consultant, Singapore",
+      quote: t('testimonials.t4.quote'),
+      author: t('testimonials.t4.author'),
+      role: t('testimonials.t4.role'),
       avatar: "MC",
       rating: 5,
       icon: <Building2 className='w-4 h-4' />
     },
     {
-      quote: "An excellent blend of technology and cultural preservation. Highly recommended!",
-      author: "Dr. Kavitha Nair",
-      role: "Linguistic Professor, JNU",
+      quote: t('testimonials.t5.quote'),
+      author: t('testimonials.t5.author'),
+      role: t('testimonials.t5.role'),
       avatar: "KN",
       rating: 5,
       icon: <Award className='w-4 h-4' />
     },
     {
-      quote: "As a tour guide, this helps me communicate better with Odia-speaking tourists.",
-      author: "Carlos Rodriguez",
-      role: "Cultural Tour Guide, Mumbai",
+      quote: t('testimonials.t6.quote'),
+      author: t('testimonials.t6.author'),
+      role: t('testimonials.t6.role'),
       avatar: "CR",
       rating: 5,
       icon: <Globe2 className='w-4 h-4' />
@@ -116,92 +116,15 @@ const Index = () => {
   ]
 
   const stats = [
-    { number: "10,000+", label: "Active Users", icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "500K+", label: "Conversations", icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "25+", label: "Countries", icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "99.9%", label: "Uptime", icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
+    { number: `${localizeNumber(10000, { locale: i18n.language as 'en' | 'or', style: 'unit' })}+`, label: t('stats.activeUsers', { value: '' }), icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: `${localizeNumber(500000, { locale: i18n.language as 'en' | 'or', style: 'unit' })}+`, label: t('stats.conversations', { value: '' }), icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: `${localizeNumber(25, { locale: i18n.language as 'en' | 'or' })}+`, label: t('stats.countries', { value: '' }), icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: `${localizeNumber(99.9, { locale: i18n.language as 'en' | 'or' })}%`, label: t('stats.uptime', { value: '' }), icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
   ]
 
   return (
     <div className='min-h-screen bg-background'>
-      {/* Navigation */}
-      <nav className='fixed top-0 w-full z-50 bg-background/80 backdrop-blur-lg border-b border-border/50'>
-        <div className='container mx-auto px-4'>
-          <div className='flex items-center justify-between h-14 sm:h-16'>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className='font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent'
-            >
-              OdiaLingua
-            </motion.div>
-
-            {/* Desktop Navigation */}
-            <div className='hidden md:flex items-center gap-4'>
-              <Button
-                variant='ghost'
-                className='text-muted-foreground hover:text-foreground'
-                onClick={() => navigate('/contact')}
-              >
-                {t('contact')}
-              </Button>
-              <ThemeToggle />
-              <LanguageToggle />
-              <Button
-                size="sm"
-                className='btn-gradient'
-                onClick={() => navigate('/login')}
-              >
-                {t('getStarted')}
-              </Button>
-            </div>
-
-            {/* Mobile Navigation */}
-            <div className='md:hidden flex items-center gap-2'>
-              <ThemeToggle />
-              <LanguageToggle />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-8 h-8 p-0"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className='md:hidden border-t border-border/50 py-4 space-y-3'
-            >
-              <Button
-                variant='ghost'
-                className='w-full justify-start text-muted-foreground hover:text-foreground'
-                onClick={() => {
-                  navigate('/contact')
-                  setMobileMenuOpen(false)
-                }}
-              >
-                {t('contact')}
-              </Button>
-              <Button
-                className='w-full btn-gradient'
-                onClick={() => {
-                  navigate('/login')
-                  setMobileMenuOpen(false)
-                }}
-              >
-                {t('getStarted')}
-              </Button>
-            </motion.div>
-          )}
-        </div>
-      </nav>
+      <Header transparent />
 
       {/* Hero Section */}
       <section className="relative pt-20 sm:pt-24 pb-12 sm:pb-16 overflow-hidden">
@@ -225,8 +148,8 @@ const Index = () => {
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 mb-6 sm:mb-8 bg-primary/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary backdrop-blur-sm"
             >
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="hidden sm:inline">ମୋ ଭାଷା, ମୋ ଗର୍ବ • AI-Powered • Live Now</span>
-              <span className="sm:hidden">AI-Powered • Live Now</span>
+              <span className="hidden sm:inline">{t('badge')}</span>
+              <span className="sm:hidden">{t('badge')}</span>
             </motion.div>
 
             {/* Main heading */}
@@ -265,7 +188,7 @@ const Index = () => {
               >
                 <Play className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">{t('hero.cta1')}</span>
-                <span className="sm:hidden">{t('getStarted')}</span>
+                <span className="sm:hidden">{t('common:getStarted', { ns: 'common' })}</span>
                 <ArrowRight className="ml-2 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
               <Button
@@ -275,7 +198,7 @@ const Index = () => {
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <span className="hidden sm:inline">{t('hero.cta2')}</span>
-                <span className="sm:hidden">Features</span>
+                <span className="sm:hidden">{t('common:features', { ns: 'common' })}</span>
                 <ChevronRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </motion.div>
@@ -318,13 +241,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Powerful Features
+              {t('features.powerfulFeatures')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Why Choose <span className="text-gradient">OdiaLingua</span>?
+              {t('features.title')} <span className="text-gradient">{t('common:logo', { ns: 'common' })}</span>?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Experience the perfect blend of cutting-edge AI technology and deep cultural understanding
+              {t('features.subtitle')}
             </p>
           </motion.div>
 
@@ -369,13 +292,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Testimonials
+              {t('testimonials.badge')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Loved by <span className="text-gradient">Thousands</span> Worldwide
+              {t('testimonials.title')}
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Join our growing community of global learners discovering the beauty of Odia language
+              {t('testimonials.subtitle')}
             </p>
           </motion.div>
 
@@ -445,12 +368,12 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
-              Ready to Begin Your
+              {t('cta.title1')}
               <br />
-              <span className="text-gradient">Odia Journey?</span>
+              <span className="text-gradient">{t('cta.title2')}</span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Join thousands of users already experiencing the future of language technology
+              {t('cta.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Button
@@ -458,8 +381,8 @@ const Index = () => {
                 className="btn-gradient text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
                 onClick={() => navigate('/login')}
               >
-                <span className="hidden sm:inline">Start Free Today</span>
-                <span className="sm:hidden">Start Free</span>
+                <span className="hidden sm:inline">{t('common:startFreeToday', { ns: 'common' })}</span>
+                <span className="sm:hidden">{t('common:startFree', { ns: 'common' })}</span>
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
               <Button
@@ -468,59 +391,14 @@ const Index = () => {
                 className="text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl"
                 onClick={() => navigate('/contact')}
               >
-                Contact Us
+                {t('common:contactUs', { ns: 'common' })}
               </Button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 bg-card/30 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-8 sm:py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8">
-            <div className="text-center md:text-left">
-              <div className="font-display text-xl sm:text-2xl font-bold text-gradient mb-2">
-                OdiaLingua
-              </div>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Preserving culture through innovation
-              </p>
-            </div>
-
-            <div className="flex items-center gap-6 sm:gap-8">
-              <button
-                onClick={() => navigate('/contact')}
-                className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {t('contact')}
-              </button>
-              <a
-                href="https://github.com/HimanshuMohanty-Git24"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors"
-              >
-                GitHub
-              </a>
-            </div>
-          </div>
-
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border/50 text-center">
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Made with ❤️ by{' '}
-              <a
-                href="https://github.com/HimanshuMohanty-Git24"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Himanshu Mohanty
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

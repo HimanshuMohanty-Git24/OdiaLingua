@@ -9,20 +9,24 @@ import NotFound from './pages/NotFound'
 import ChatUI from './components/ChatUI'
 import { getUser } from './auth'
 import { Models } from 'appwrite'
+import { useTranslation } from 'react-i18next'
 
 // Enhanced loading component with theme support
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="flex space-x-2">
-        <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-        <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-        <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+const LoadingSpinner = () => {
+  const { t } = useTranslation('common');
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="flex space-x-2">
+          <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+        </div>
+        <p className="text-sm text-muted-foreground animate-pulse">{t('loading')}</p>
       </div>
-      <p className="text-sm text-muted-foreground animate-pulse">Loading OdiaLingua...</p>
     </div>
-  </div>
-)
+  )
+}
 
 // Protected Route Component with enhanced UX
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -57,6 +61,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 function App() {
+  const { i18n, t } = useTranslation('meta');
+
+  useEffect(() => {
+    document.title = t('title');
+  }, [i18n.language, t]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -64,23 +74,23 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
-        
+
         {/* Protected routes */}
-        <Route 
-          path="/chat" 
+        <Route
+          path="/chat"
           element={
             <ProtectedRoute>
               <ChatUI />
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         {/* 404 route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      
+
       {/* Modern toast notifications */}
-      <Toaster 
+      <Toaster
         position="top-right"
         gutter={8}
         toastOptions={{
