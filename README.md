@@ -135,6 +135,15 @@
 </td>
 <td>
 
+### 🌍 Bilingual Interface
+- Seamless Odia ↔ English UI switching
+- Complete interface translation coverage
+- Helps users of any language background
+- Cultural context preservation
+
+</td>
+<td>
+
 ### 🔒 Enterprise Security
 - OAuth 2.0 authentication
 - End-to-end encryption
