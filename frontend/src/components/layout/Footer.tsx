@@ -6,9 +6,11 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export function Footer() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   
   const socialLinks = [
     {
@@ -38,10 +40,10 @@ export function Footer() {
   ]
 
   const quickLinks = [
-    { name: 'Features', href: '#features' },
-    { name: 'About', href: '#about' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Privacy', href: '/privacy' },
+    { name: t('footer.quickLinks.features'), href: '#features' },
+    { name: t('footer.quickLinks.about'), href: '#about' },
+    { name: t('footer.quickLinks.contact'), href: '/contact' },
+    { name: t('footer.quickLinks.privacy'), href: '/privacy' },
   ]
 
   const scrollToSection = (href: string) => {
@@ -97,15 +99,15 @@ export function Footer() {
             <div className="max-w-2xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-primary/10 border border-primary/20 rounded-full text-sm font-medium text-primary backdrop-blur-sm">
                 <Sparkles className="w-4 h-4" />
-                <span>Stay Updated</span>
+                <span>{t('badge.stayUpdated')}</span>
               </div>
               
               <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Ready to revolutionize your <span className="text-gradient">Odia experience</span>?
+                {t('footer.newsletter.readyToRevolutionize')} <span className="text-gradient">{t('footer.newsletter.odiaExperience')}</span>?
               </h3>
               
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                Join thousands of users who are already experiencing the future of Odia language technology.
+                {t('footer.newsletter.joinThousands')}
               </p>
               
               <Button
@@ -113,7 +115,7 @@ export function Footer() {
                 onClick={() => navigate('/login')}
                 className="btn-gradient rounded-2xl px-8 py-4 shadow-glow hover:shadow-glow-lg transition-all duration-300 group"
               >
-                Get Started Free
+                {t('footer.newsletter.getStartedFree')}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </div>
@@ -133,17 +135,16 @@ export function Footer() {
             <motion.div variants={itemVariants} className="lg:col-span-1">
               <div className="mb-8">
                 <div className="font-display text-3xl font-bold text-gradient mb-4">
-                  OdiaLingua
+                  {t('logo')}
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Bridging tradition with innovation. The world's first AI-powered platform 
-                  designed exclusively for the Odia language community.
+                  {t('footer.brand.tagline')}
                 </p>
                 
                 {/* Mission Statement */}
                 <div className="p-4 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 mb-6">
                   <p className="text-sm text-muted-foreground italic">
-                    "Preserving our beautiful language while embracing the future of technology"
+                    "{t('footer.brand.mission')}"
                   </p>
                 </div>
               </div>
@@ -169,7 +170,7 @@ export function Footer() {
 
             {/* Quick Links */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
-              <h3 className="font-semibold text-lg mb-6 text-foreground">Quick Links</h3>
+              <h3 className="font-semibold text-lg mb-6 text-foreground">{t('footer.quickLinks.title')}</h3>
               <nav className="space-y-4">
                 {quickLinks.map((link, index) => (
                   <motion.button
@@ -191,7 +192,7 @@ export function Footer() {
 
             {/* Contact Info */}
             <motion.div variants={itemVariants} className="lg:col-span-1">
-              <h3 className="font-semibold text-lg mb-6 text-foreground">Get in Touch</h3>
+              <h3 className="font-semibold text-lg mb-6 text-foreground">{t('footer.getInTouch.title')}</h3>
               
               <div className="space-y-4 mb-8">
                 <motion.a
@@ -203,7 +204,7 @@ export function Footer() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium">Email</div>
+                    <div className="text-sm font-medium">{t('footer.getInTouch.email')}</div>
                     <div className="text-xs">codehimanshu24@gmail.com</div>
                   </div>
                 </motion.a>
@@ -211,7 +212,7 @@ export function Footer() {
 
               {/* Tech Stack */}
               <div className="p-4 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/50">
-                <h4 className="font-medium text-sm mb-3 text-foreground">Built With</h4>
+                <h4 className="font-medium text-sm mb-3 text-foreground">{t('footer.getInTouch.builtWith')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {['React', 'TypeScript', 'Tailwind', 'Framer Motion', 'Appwrite'].map((tech) => (
                     <span
@@ -256,13 +257,13 @@ export function Footer() {
                   onClick={() => scrollToSection('/privacy')}
                   className="hover:text-foreground transition-colors duration-200"
                 >
-                  Privacy Policy
+                  {t('footer.privacyPolicy')}
                 </button>
                 <button 
                   onClick={() => scrollToSection('/terms')}
                   className="hover:text-foreground transition-colors duration-200"
                 >
-                  Terms of Service
+                  {t('footer.termsOfService')}
                 </button>
               </div>
             </div>

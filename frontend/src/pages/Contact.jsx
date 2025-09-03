@@ -20,9 +20,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { useTranslation } from "react-i18next";
 import toast from 'react-hot-toast';
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     subject: '',
     message: ''
@@ -33,7 +36,7 @@ const Contact = () => {
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (!formData.subject.trim() || !formData.message.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error(t('contact.form.fillFields'));
       return;
     }
 
@@ -46,10 +49,10 @@ const Contact = () => {
       const mailtoLink = `mailto:codehimanshu24@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(formData.message)}`;
       window.location.href = mailtoLink;
       
-      toast.success('Email client opened successfully!');
+      toast.success(t('contact.form.emailOpened'));
       setFormData({ subject: '', message: '' });
     } catch (error) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('contact.form.errorMessage'));
     } finally {
       setIsSubmitting(false);
     }
@@ -66,48 +69,48 @@ const Contact = () => {
     {
       icon: <Github className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://github.com/HimanshuMohanty-Git24",
-      label: "GitHub",
+      label: t('contact.social.links.github.label'),
       color: "hover:text-gray-900 dark:hover:text-gray-100",
-      description: "Open source projects"
+      description: t('contact.social.links.github.description')
     },
     {
       icon: <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://twitter.com/CodingHima",
-      label: "Twitter",
+      label: t('contact.social.links.twitter.label'),
       color: "hover:text-blue-500",
-      description: "Latest updates & thoughts"
+      description: t('contact.social.links.twitter.description')
     },
     {
       icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://himanshumohanty.netlify.app/",
-      label: "Portfolio",
+      label: t('contact.social.links.portfolio.label'),
       color: "hover:text-green-600",
-      description: "My work & projects"
+      description: t('contact.social.links.portfolio.description')
     },
     {
       icon: <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />,
       href: "https://www.linkedin.com/in/himanshumohanty/",
-      label: "LinkedIn",
+      label: t('contact.social.links.linkedin.label'),
       color: "hover:text-blue-600",
-      description: "Professional network"
+      description: t('contact.social.links.linkedin.description')
     },
   ];
 
   const features = [
     {
       icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Quick Response",
-      description: "I typically respond within 24 hours"
+      title: t('contact.features.quickResponse.title'),
+      description: t('contact.features.quickResponse.description')
     },
     {
       icon: <Heart className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Open to Collaborate",
-      description: "Always excited about new projects"
+      title: t('contact.features.collaborate.title'),
+      description: t('contact.features.collaborate.description')
     },
     {
       icon: <Star className="w-4 h-4 sm:w-5 sm:h-5" />,
-      title: "Quality Focus",
-      description: "Committed to delivering excellence"
+      title: t('contact.features.quality.title'),
+      description: t('contact.features.quality.description')
     }
   ];
 
@@ -122,18 +125,20 @@ const Contact = () => {
               className="inline-flex items-center gap-2 sm:gap-3 font-display text-lg sm:text-xl font-bold text-foreground hover:text-primary transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span className="hidden sm:inline">OdiaLingua</span>
-              <span className="sm:hidden">Back</span>
+              <span className="hidden sm:inline">{t('logo')}</span>
+              <span className="sm:hidden">{t('contact.navigation.back')}</span>
             </Link>
             
             {/* Desktop Navigation */}
-            <div className="hidden sm:flex items-center">
+            <div className="hidden sm:flex items-center gap-2">
               <ThemeToggle />
+              <LanguageToggle />
             </div>
 
             {/* Mobile Navigation */}
             <div className="sm:hidden flex items-center gap-2">
               <ThemeToggle />
+              <LanguageToggle />
               <Button
                 variant="ghost"
                 size="sm"
@@ -168,21 +173,20 @@ const Contact = () => {
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 mb-6 sm:mb-8 bg-primary/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary backdrop-blur-sm"
             >
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="hidden sm:inline">Available for new opportunities</span>
-              <span className="sm:hidden">Available</span>
+              <span className="hidden sm:inline">{t('contact.badge.available')}</span>
+              <span className="sm:hidden">{t('contact.badge.availableShort')}</span>
             </motion.div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6">
-              <span className="block">Let's Build</span>
-              <span className="block text-gradient">Something Amazing</span>
-              <span className="block">Together</span>
+              <span className="block">{t('contact.hero.title1')}</span>
+              <span className="block text-gradient">{t('contact.hero.title2')}</span>
+              <span className="block">{t('contact.hero.title3')}</span>
             </h1>
             
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed mb-8 sm:mb-12 max-w-3xl mx-auto px-4">
-              Hi, I'm <span className="font-semibold text-foreground">Himanshu Mohanty</span> 👋
+              {t('contact.hero.greeting')} <span className="font-semibold text-foreground">{t('contact.hero.name')}</span> 👋
               <br className="hidden sm:block" />
-              Thank you for your interest in OdiaLingua! I'm always excited to connect with fellow developers, 
-              language enthusiasts, and anyone passionate about preserving culture through technology.
+              {t('contact.hero.description')}
             </p>
 
             {/* Quick features */}
@@ -224,19 +228,18 @@ const Contact = () => {
                   <div className="mb-6 sm:mb-8">
                     <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
                       <Mail className="w-3 h-3 mr-2" />
-                      Get in Touch
+                      {t('contact.badge.getInTouch')}
                     </Badge>
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Send me a message</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">{t('contact.form.title')}</h2>
                     <p className="text-sm sm:text-base text-muted-foreground">
-                      Have a question, collaboration idea, or just want to say hello? 
-                      I'd love to hear from you!
+                      {t('contact.form.subtitle')}
                     </p>
                   </div>
 
                   <form onSubmit={handleEmailSubmit} className="space-y-4 sm:space-y-6">
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                        Subject
+                        {t('contact.form.subject')}
                       </label>
                       <input
                         type="text"
@@ -245,14 +248,14 @@ const Contact = () => {
                         value={formData.subject}
                         onChange={handleInputChange}
                         className="w-full rounded-xl border border-input bg-background px-3 sm:px-4 py-2 sm:py-3 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        placeholder="What's this about?"
+                        placeholder={t('contact.form.subjectPlaceholder')}
                         required
                       />
                     </div>
                     
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                        Message
+                        {t('contact.form.message')}
                       </label>
                       <textarea
                         name="message"
@@ -261,7 +264,7 @@ const Contact = () => {
                         value={formData.message}
                         onChange={handleInputChange}
                         className="w-full rounded-xl border border-input bg-background px-3 sm:px-4 py-2 sm:py-3 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
-                        placeholder="Tell me more about your project, question, or just say hi!"
+                        placeholder={t('contact.form.messagePlaceholder')}
                         required
                       />
                     </div>
@@ -274,12 +277,12 @@ const Contact = () => {
                       {isSubmitting ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Sending...
+                          {t('contact.form.sending')}
                         </>
                       ) : (
                         <>
                           <Send className="w-4 h-4 mr-2" />
-                          Send Message
+                          {t('contact.form.sendMessage')}
                         </>
                       )}
                     </Button>
@@ -299,9 +302,9 @@ const Contact = () => {
               <div>
                 <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
                   <Heart className="w-3 h-3 mr-2" />
-                  Connect with me
+                  {t('contact.badge.connectWithMe')}
                 </Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Let's stay connected</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">{t('contact.social.title')}</h2>
                 
                 <div className="grid gap-3 sm:gap-4">
                   {socialLinks.map((link, index) => (
@@ -335,24 +338,24 @@ const Contact = () => {
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                    <h3 className="font-semibold text-sm sm:text-base">Quick Facts</h3>
+                    <h3 className="font-semibold text-sm sm:text-base">{t('contact.badge.quickFacts')}</h3>
                   </div>
                   <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Based in Odisha, India 🇮🇳
+                      {t('contact.facts.location')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Full-stack developer with AI/ML expertise
+                      {t('contact.facts.role')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Passionate about language preservation
+                      {t('contact.facts.passion')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                      Open to remote collaborations
+                      {t('contact.facts.remote')}
                     </li>
                   </ul>
                 </CardContent>
@@ -367,7 +370,7 @@ const Contact = () => {
         <div className="container mx-auto px-4 py-6 sm:py-8">
           <div className="text-center text-xs sm:text-sm text-muted-foreground">
             <p>
-              Built with ❤️ using React, TypeScript, and modern web technologies
+              {t('contact.footer.builtWith')}
             </p>
           </div>
         </div>
