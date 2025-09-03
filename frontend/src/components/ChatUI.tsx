@@ -160,48 +160,51 @@ const MarkdownComponents = {
 };
 
 // Professional Loading Screen
-const LoadingScreen = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">
-    <div className="relative">
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 sm:mb-8"
-      >
+const LoadingScreen = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">
+      <div className="relative">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary"
-        />
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-2 rounded-full border-4 border-transparent border-t-purple-500"
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 sm:mb-8"
+        >
           <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center shadow-lg"
-          >
-            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-          </motion.div>
-        </div>
-      </motion.div>
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-2 rounded-full border-4 border-transparent border-t-purple-500"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center shadow-lg"
+            >
+              <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </motion.div>
+          </div>
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-center"
-      >
-        <h1 className="text-2xl sm:text-3xl font-bold text-gradient mb-2">OdiaLingua</h1>
-        <p className="text-muted-foreground text-base sm:text-lg mb-6">Loading your AI companion</p>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-center"
+        >
+          <h1 className="text-2xl sm:text-3xl font-bold text-gradient mb-2">{t('logo')}</h1>
+          <p className="text-muted-foreground text-base sm:text-lg mb-6">Loading your AI companion</p>
+        </motion.div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Welcome Screen for New Chat
 const WelcomeScreen = ({ userName, onStartChat }: {
@@ -736,7 +739,7 @@ const handleStopRecording = async () => {
       // Add footer
       lines.push('='.repeat(50));
       lines.push('Exported from OdiaLingua - Your AI Language Companion');
-      lines.push('https://odialingua.com');
+      lines.push('https://odialingua.me');
 
       const textContent = lines.join('\n');
 
@@ -1376,23 +1379,21 @@ const handleStopRecording = async () => {
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
                 <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
-              <span className="font-bold text-lg sm:text-xl text-gradient">OdiaLingua</span>
+              <span className="font-bold text-lg sm:text-xl text-gradient">{t('logo')}</span>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <ThemeToggle />
+              <LanguageToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-6 h-6 sm:w-8 sm:h-8 p-0">
-                    <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
+                    <Settings className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{t('chat.settings')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LanguageToggle />
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
                       if (currentSession) {
@@ -1416,10 +1417,10 @@ const handleStopRecording = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-6 h-6 sm:w-8 sm:h-8 p-0 lg:hidden"
+                className="w-8 h-8 p-0 lg:hidden ml-1"
                 onClick={() => setSidebarOpen(false)}
               >
-                <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -1569,9 +1570,9 @@ const handleStopRecording = async () => {
                       <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3 sm:mb-4">
                         <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                       </div>
-                      <h3 className="text-lg sm:text-xl font-medium mb-2">Start the conversation</h3>
+                      <h3 className="text-lg sm:text-xl font-medium mb-2">{t('chat.startConversation')}</h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Send a message to begin chatting with your AI companion
+                        {t('chat.companion')}
                       </p>
                     </div>
                   </div>
