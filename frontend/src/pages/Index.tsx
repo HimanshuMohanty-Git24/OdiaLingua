@@ -116,10 +116,10 @@ const Index = () => {
   ]
 
   const stats = [
-    { number: "10,000+", label: "Active Users", icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "500K+", label: "Conversations", icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "25+", label: "Countries", icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
-    { number: "99.9%", label: "Uptime", icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
+    { number: t('stats.numbers.activeUsers'), label: t('stats.activeUsers'), icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: t('stats.numbers.conversations'), label: t('stats.conversations'), icon: <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: t('stats.numbers.countries'), label: t('stats.countries'), icon: <Globe className="w-4 h-4 sm:w-5 sm:h-5" /> },
+    { number: t('stats.numbers.uptime'), label: t('stats.uptime'), icon: <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" /> }
   ]
 
   return (
@@ -133,7 +133,7 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               className='font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent'
             >
-              OdiaLingua
+              {t('logo')}
             </motion.div>
 
             {/* Desktop Navigation */}
@@ -143,7 +143,7 @@ const Index = () => {
                 className='text-muted-foreground hover:text-foreground'
                 onClick={() => navigate('/contact')}
               >
-                {t('contact')}
+                {t('nav.contact')}
               </Button>
               <ThemeToggle />
               <LanguageToggle />
@@ -187,7 +187,7 @@ const Index = () => {
                   setMobileMenuOpen(false)
                 }}
               >
-                {t('contact')}
+                {t('nav.contact')}
               </Button>
               <Button
                 className='w-full btn-gradient'
@@ -225,8 +225,12 @@ const Index = () => {
               className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 mb-6 sm:mb-8 bg-primary/10 border border-primary/20 rounded-full text-xs sm:text-sm font-medium text-primary backdrop-blur-sm"
             >
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="hidden sm:inline">ମୋ ଭାଷା, ମୋ ଗର୍ବ • AI-Powered • Live Now</span>
-              <span className="sm:hidden">AI-Powered • Live Now</span>
+              <span className="hidden sm:inline">
+                {t('badge.myLanguage')} • {t('badge.aiPowered')} • {t('badge.liveNow')}
+              </span>
+              <span className="sm:hidden">
+                {t('badge.aiPowered')} • {t('badge.liveNow')}
+              </span>
             </motion.div>
 
             {/* Main heading */}
@@ -275,7 +279,7 @@ const Index = () => {
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <span className="hidden sm:inline">{t('hero.cta2')}</span>
-                <span className="sm:hidden">Features</span>
+                <span className="sm:hidden">{t('nav.features')}</span>
                 <ChevronRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </motion.div>
@@ -318,13 +322,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Powerful Features
+              {t('badge.powerfulFeatures')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Why Choose <span className="text-gradient">OdiaLingua</span>?
+              {t('features.whyChoose')} <span className="text-gradient">{t('features.odiaLingua')}</span>?
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Experience the perfect blend of cutting-edge AI technology and deep cultural understanding
+              {t('features.perfectBlend')}
             </p>
           </motion.div>
 
@@ -369,13 +373,13 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <Badge variant="secondary" className="mb-4 text-xs sm:text-sm">
-              Testimonials
+              {t('badge.testimonials')}
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              Loved by <span className="text-gradient">Thousands</span> Worldwide
+              {t('testimonials.lovedBy')} <span className="text-gradient">{t('testimonials.thousands')}</span> {t('testimonials.worldwide')}
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Join our growing community of global learners discovering the beauty of Odia language
+              {t('testimonials.joinCommunity')}
             </p>
           </motion.div>
 
@@ -445,12 +449,12 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
-              Ready to Begin Your
+              {t('hero.readyToBegin')}
               <br />
-              <span className="text-gradient">Odia Journey?</span>
+              <span className="text-gradient">{t('hero.odiaJourney')}</span>
             </h2>
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
-              Join thousands of users already experiencing the future of language technology
+              {t('hero.joinThousands')}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Button
@@ -458,8 +462,8 @@ const Index = () => {
                 className="btn-gradient text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
                 onClick={() => navigate('/login')}
               >
-                <span className="hidden sm:inline">Start Free Today</span>
-                <span className="sm:hidden">Start Free</span>
+                <span className="hidden sm:inline">{t('hero.startFreeToday')}</span>
+                <span className="sm:hidden">{t('hero.startFree')}</span>
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
               <Button
@@ -468,7 +472,7 @@ const Index = () => {
                 className="text-base sm:text-lg px-8 sm:px-12 py-4 sm:py-6 rounded-2xl"
                 onClick={() => navigate('/contact')}
               >
-                Contact Us
+                {t('hero.contactUs')}
               </Button>
             </div>
           </motion.div>
@@ -481,10 +485,10 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 sm:gap-8">
             <div className="text-center md:text-left">
               <div className="font-display text-xl sm:text-2xl font-bold text-gradient mb-2">
-                OdiaLingua
+                {t('logo')}
               </div>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Preserving culture through innovation
+                {t('footer.preservingCulture')}
               </p>
             </div>
 
@@ -493,7 +497,7 @@ const Index = () => {
                 onClick={() => navigate('/contact')}
                 className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors"
               >
-                {t('contact')}
+                {t('nav.contact')}
               </button>
               <a
                 href="https://github.com/HimanshuMohanty-Git24"
@@ -508,7 +512,7 @@ const Index = () => {
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-border/50 text-center">
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Made with ❤️ by{' '}
+              {t('footer.madeWith')} ❤️ {t('footer.by')}{' '}
               <a
                 href="https://github.com/HimanshuMohanty-Git24"
                 target="_blank"

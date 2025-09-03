@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ArrowRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from './ThemeToggle'
+import { LanguageToggle } from '../LanguageToggle'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 interface HeaderProps {
@@ -14,6 +16,7 @@ export function Header({ transparent = false }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,9 +28,9 @@ export function Header({ transparent = false }: HeaderProps) {
   }, [])
 
   const navItems = [
-    { name: 'Features', href: '#features' },
-    { name: 'About', href: '#about' },
-    { name: 'Contact', href: '/contact' },
+    { name: t('nav.features'), href: '#features' },
+    { name: t('nav.about'), href: '#about' },
+    { name: t('nav.contact'), href: '/contact' },
   ]
 
   const scrollToSection = (href: string) => {
@@ -67,7 +70,7 @@ export function Header({ transparent = false }: HeaderProps) {
                 transition={{ duration: 0.2 }}
                 className="font-display text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent group-hover:from-primary-500 group-hover:to-primary-600 transition-all duration-300"
               >
-                OdiaLingua
+                {t('logo')}
               </motion.div>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
@@ -92,6 +95,7 @@ export function Header({ transparent = false }: HeaderProps) {
             {/* Right side actions */}
             <div className="flex items-center gap-4">
               <ThemeToggle />
+              <LanguageToggle />
               
               {/* Get Started Button */}
               <motion.div
@@ -104,7 +108,7 @@ export function Header({ transparent = false }: HeaderProps) {
                   className="hidden sm:inline-flex btn-gradient rounded-xl px-6 py-2 shadow-glow hover:shadow-glow-lg transition-all duration-300 group"
                 >
                   <Sparkles className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Get Started
+                  {t('getStarted')}
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Button>
               </motion.div>
@@ -189,7 +193,7 @@ export function Header({ transparent = false }: HeaderProps) {
                       className="w-full btn-gradient rounded-xl py-3 shadow-glow hover:shadow-glow-lg transition-all duration-300"
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Get Started Free
+                      {t('nav.getStartedFree')}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </motion.div>

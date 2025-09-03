@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Globe, MessageCircle, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export function Hero() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
@@ -33,7 +35,7 @@ export function Hero() {
             className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-primary/10 dark:bg-primary/20 border border-primary/20 rounded-full text-sm font-medium text-primary-700 dark:text-primary-300 backdrop-blur-sm"
           >
             <Sparkles className="w-4 h-4" />
-            <span>ମୋ ଭାଷା, ମୋ ଗର୍ବ - My Language, My Pride</span>
+            <span>{t('badge.myLanguage')}</span>
           </motion.div>
 
           {/* Main heading */}
@@ -43,9 +45,9 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
           >
-            <span className="block">The Future of</span>
-            <span className="block text-gradient">Odia Language</span>
-            <span className="block">Is Here</span>
+            <span className="block">{t('hero.title1')}</span>
+            <span className="block text-gradient">{t('hero.title2')}</span>
+            <span className="block">{t('hero.title3')}</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -55,8 +57,7 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed"
           >
-            Experience the first AI-powered conversational platform designed exclusively for Odia speakers. 
-            Learn, communicate, and explore with cutting-edge technology that understands your native language.
+            {t('hero.subtitle')}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -71,7 +72,7 @@ export function Hero() {
               className="group btn-gradient text-base px-8 py-4 rounded-xl shadow-glow hover:shadow-glow-lg transition-all duration-300"
               onClick={() => navigate('/login')}
             >
-              Start Your Journey
+              {t('hero.startJourney')}
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
             <Button
@@ -80,7 +81,7 @@ export function Hero() {
               className="text-base px-8 py-4 rounded-xl border-2 hover:bg-primary/5 transition-all duration-300"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Explore Features
+              {t('hero.cta2')}
             </Button>
           </motion.div>
 

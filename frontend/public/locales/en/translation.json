@@ -1,8 +1,103 @@
 {
   "greeting": "Hello, World!",
-  "contact": "Contact",
+  "contact": {
+    "nav": "Contact",
+    "navigation": {
+      "back": "Back"
+    },
+    "badge": {
+      "available": "Available for new opportunities",
+      "availableShort": "Available",
+      "getInTouch": "Get in Touch",
+      "connectWithMe": "Connect with me",
+      "quickFacts": "Quick Facts"
+    },
+    "hero": {
+      "title1": "Let's Build",
+      "title2": "Something Amazing",
+      "title3": "Together",
+      "greeting": "Hi, I'm",
+      "name": "Himanshu Mohanty",
+      "description": "Thank you for your interest in OdiaLingua! I'm always excited to connect with fellow developers, language enthusiasts, and anyone passionate about preserving culture through technology."
+    },
+    "features": {
+      "quickResponse": {
+        "title": "Quick Response",
+        "description": "I typically respond within 24 hours"
+      },
+      "collaborate": {
+        "title": "Open to Collaborate",
+        "description": "Always excited about new projects"
+      },
+      "quality": {
+        "title": "Quality Focus",
+        "description": "Committed to delivering excellence"
+      }
+    },
+    "form": {
+      "title": "Send me a message",
+      "subtitle": "Have a question, collaboration idea, or just want to say hello? I'd love to hear from you!",
+      "subject": "Subject",
+      "subjectPlaceholder": "What's this about?",
+      "message": "Message",
+      "messagePlaceholder": "Tell me more about your project, question, or just say hi!",
+      "sendMessage": "Send Message",
+      "sending": "Sending...",
+      "fillFields": "Please fill in all fields",
+      "emailOpened": "Email client opened successfully!",
+      "errorMessage": "Something went wrong. Please try again."
+    },
+    "social": {
+      "title": "Let's stay connected",
+      "links": {
+        "github": {
+          "label": "GitHub",
+          "description": "Open source projects"
+        },
+        "twitter": {
+          "label": "Twitter",
+          "description": "Latest updates & thoughts"
+        },
+        "portfolio": {
+          "label": "Portfolio",
+          "description": "My work & projects"
+        },
+        "linkedin": {
+          "label": "LinkedIn",
+          "description": "Professional network"
+        }
+      }
+    },
+    "facts": {
+      "location": "Based in Odisha, India 🇮🇳",
+      "role": "Full-stack developer with AI/ML expertise",
+      "passion": "Passionate about language preservation",
+      "remote": "Open to remote collaborations"
+    },
+    "footer": {
+      "builtWith": "Built with ❤️ using React, TypeScript, and modern web technologies"
+    }
+  },
   "getStarted": "Get Started",
+  "logo": "OdiaLingua",
+  "nav": {
+    "features": "Features",
+    "about": "About",
+    "contact": "Contact",
+    "getStartedFree": "Get Started Free"
+  },
+  "badge": {
+    "myLanguage": "My Language, My Pride",
+    "aiPowered": "AI-Powered",
+    "liveNow": "Live Now",
+    "stayUpdated": "Stay Updated",
+    "powerfulFeatures": "Powerful Features",
+    "testimonials": "Testimonials"
+  },
   "features": {
+    "whyChoose": "Why Choose",
+    "odiaLingua": "OdiaLingua",
+    "perfectBlend": "Experience the perfect blend of cutting-edge AI technology and deep cultural understanding",
     "aiConversations": {
       "title": "AI-Powered Conversations",
       "description": "Experience natural, context-aware conversations in Odia with our advanced language model"
@@ -34,7 +129,104 @@
     "title3": "Odia Experience",
     "subtitle": "Revolutionary AI technology meets the rich heritage of Odia language. Chat naturally, learn effortlessly, and explore without limits.",
     "cta1": "Start Speaking Odia",
-    "cta2": "Explore Features"
+    "cta2": "Explore Features",
+    "startJourney": "Start Your Journey",
+    "startFreeToday": "Start Free Today",
+    "startFree": "Start Free",
+    "readyToBegin": "Ready to Begin Your",
+    "odiaJourney": "Odia Journey?",
+    "joinThousands": "Join thousands of users already experiencing the future of language technology",
+    "contactUs": "Contact Us"
+  },
+  "testimonials": {
+    "lovedBy": "Loved by",
+    "thousands": "Thousands",
+    "worldwide": "Worldwide",
+    "joinCommunity": "Join our growing community of global learners discovering the beauty of Odia language"
+  },
+  "footer": {
+    "preservingCulture": "Preserving culture through innovation",
+    "madeWith": "Made with",
+    "by": "by",
+    "newsletter": {
+      "readyToRevolutionize": "Ready to revolutionize your",
+      "odiaExperience": "Odia experience",
+      "joinThousands": "Join thousands of users who are already experiencing the future of Odia language technology.",
+      "getStartedFree": "Get Started Free"
+    },
+    "brand": {
+      "tagline": "Bridging tradition with innovation. The world's first AI-powered platform designed exclusively for the Odia language community.",
+      "mission": "Preserving our beautiful language while embracing the future of technology"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "features": "Features",
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy"
+    },
+    "getInTouch": {
+      "title": "Get in Touch",
+      "email": "Email",
+      "builtWith": "Built With"
+    },
+    "copyright": "© 2025 OdiaLingua. Made with",
+    "createdBy": "by",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "stats": {
+    "activeUsers": "Active Users",
+    "conversations": "Conversations",
+    "countries": "Countries",
+    "uptime": "Uptime",
+    "numbers": {
+      "activeUsers": "10,000+",
+      "conversations": "500K+",
+      "countries": "25+",
+      "uptime": "99.9%"
+    }
+  },
+  "login": {
+    "checkingAuth": "Checking authentication...",
+    "connectingGoogle": "Connecting to Google...",
+    "loginFailed": "Failed to sign in. Please try again.",
+    "badge": {
+      "readyExperience": "Ready to experience the future",
+      "readyStart": "Ready to start"
+    },
+    "welcome": {
+      "title": "Welcome to",
+      "subtitle": "Start your journey with the world's first AI-powered Odia language platform. Connect with your heritage through technology."
+    },
+    "benefits": {
+      "aiConversations": {
+        "title": "AI-Powered Conversations",
+        "description": "Chat naturally in Odia with advanced AI"
+      },
+      "secure": {
+        "title": "Secure & Private",
+        "description": "Your data is protected with enterprise-grade security"
+      },
+      "fast": {
+        "title": "Lightning Fast",
+        "description": "Instant responses powered by cutting-edge technology"
+      }
+    },
+    "form": {
+      "signInTitle": "Sign in to continue",
+      "signInSubtitle": "One click to unlock the future of Odia language",
+      "continueGoogle": "Continue with Google",
+      "connecting": "Connecting...",
+      "termsText": "By signing in, you agree to our Terms of Service and Privacy Policy.",
+      "secureText": "Your data is secure and never shared with third parties."
+    },
+    "trust": {
+      "secure": "Secure",
+      "fast": "Fast",
+      "modern": "Modern"
+    },
+    "back": "Back"
   },
   "chat": {
     "newChat": "New Chat",
