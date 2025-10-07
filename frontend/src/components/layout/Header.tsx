@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowRight, Sparkles } from 'lucide-react'
+import { Menu, X, ArrowRight, Sparkles, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageToggle } from '../LanguageToggle'
@@ -31,10 +31,13 @@ export function Header({ transparent = false }: HeaderProps) {
     { name: t('nav.features'), href: '#features' },
     { name: t('nav.about'), href: '#about' },
     { name: t('nav.contact'), href: '/contact' },
+    { name: 'GitHub', href: 'https://github.com/HimanshuMohanty-Git24/OdiaLingua', icon: Github, external: true },
   ]
 
   const scrollToSection = (href: string) => {
-    if (href.startsWith('#')) {
+    if (href.startsWith('http')) {
+      window.open(href, '_blank', 'noopener,noreferrer')
+    } else if (href.startsWith('#')) {
       const element = document.querySelector(href)
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' })
@@ -84,8 +87,9 @@ export function Header({ transparent = false }: HeaderProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative group"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative group flex items-center gap-2"
                 >
+                  {item.icon && <item.icon className="w-4 h-4" />}
                   {item.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary rounded-full group-hover:w-full transition-all duration-300" />
                 </motion.button>
@@ -172,8 +176,9 @@ export function Header({ transparent = false }: HeaderProps) {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       onClick={() => scrollToSection(item.href)}
-                      className="text-left text-lg text-muted-foreground hover:text-foreground transition-colors duration-200 py-2"
+                      className="text-left text-lg text-muted-foreground hover:text-foreground transition-colors duration-200 py-2 flex items-center gap-2"
                     >
+                      {item.icon && <item.icon className="w-5 h-5" />}
                       {item.name}
                     </motion.button>
                   ))}

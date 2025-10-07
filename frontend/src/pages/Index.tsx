@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import {
   Brain, MessageSquare, Globe, ArrowRight, Users, BookOpen,
   GraduationCap, Building2, Globe2, Star, TrendingUp,
-  Shield, Zap, Heart, Award, ChevronRight, Play, Menu, X
+  Shield, Zap, Heart, Award, ChevronRight, Play, Menu, X, Github
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -145,6 +145,14 @@ const Index = () => {
               >
                 {t('nav.contact')}
               </Button>
+              <Button
+                variant='ghost'
+                size="sm"
+                className='text-muted-foreground hover:text-foreground'
+                onClick={() => window.open('https://github.com/HimanshuMohanty-Git24/OdiaLingua', '_blank', 'noopener,noreferrer')}
+              >
+                <Github className="w-5 h-5" />
+              </Button>
               <ThemeToggle />
               <LanguageToggle />
               <Button
@@ -188,6 +196,17 @@ const Index = () => {
                 }}
               >
                 {t('nav.contact')}
+              </Button>
+              <Button
+                variant='ghost'
+                className='w-full justify-start text-muted-foreground hover:text-foreground'
+                onClick={() => {
+                  window.open('https://github.com/HimanshuMohanty-Git24/OdiaLingua', '_blank', 'noopener,noreferrer')
+                  setMobileMenuOpen(false)
+                }}
+              >
+                <Github className="w-4 h-4 mr-2" />
+                GitHub
               </Button>
               <Button
                 className='w-full btn-gradient'
