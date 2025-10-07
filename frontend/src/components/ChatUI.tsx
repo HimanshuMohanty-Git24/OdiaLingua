@@ -13,7 +13,8 @@ import {
   ChevronDown, Search, Home, Archive,
   Minimize2, Download, Share2, Mic, Image,
   Paperclip, Smile, Phone, Video, Info,
-  Loader2, CheckCircle, AlertCircle, Languages
+  Loader2, CheckCircle, AlertCircle, Languages,
+  XCircle // Add this import
 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -159,11 +160,122 @@ const MarkdownComponents = {
   ),
 };
 
-// Professional Loading Screen
+// Professional Loading Screen with Backend Status Check
 const LoadingScreen = () => {
   const { t } = useTranslation();
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline' | 'waking'>('checking');
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    const checkBackendStatus = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+        const response = await fetch(`${API_BASE_URL}/`, {
+          signal: controller.signal,
+          cache: 'no-cache'
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok && isMounted) {
+          setBackendStatus('online');
+          return true;
+        }
+      } catch (error) {
+        if (isMounted) {
+          setBackendStatus('offline');
+        }
+      }
+      return false;
+    };
+
+    const attemptConnection = async () => {
+      const isOnline = await checkBackendStatus();
+      
+      if (!isOnline && isMounted) {
+        setBackendStatus('waking');
+        setRetryCount(prev => prev + 1);
+        
+        // Retry with exponential backoff (max 5 times)
+        if (retryCount < 5) {
+          timeoutId = setTimeout(() => {
+            attemptConnection();
+          }, Math.min(3000 + (retryCount * 2000), 15000)); // 3s, 5s, 7s, 9s, 11s
+        } else {
+          setBackendStatus('offline');
+        }
+      }
+    };
+
+    attemptConnection();
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [retryCount]);
+
+  const getStatusConfig = () => {
+    switch (backendStatus) {
+      case 'checking':
+        return {
+          icon: <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />,
+          text: 'Checking',
+          color: 'text-blue-500',
+          bg: 'bg-blue-500/10'
+        };
+      case 'online':
+        return {
+          icon: <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />,
+          text: 'Connected',
+          color: 'text-green-500',
+          bg: 'bg-green-500/10'
+        };
+      case 'waking':
+        return {
+          icon: <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />,
+          text: 'Waking up...',
+          color: 'text-amber-500',
+          bg: 'bg-amber-500/10'
+        };
+      case 'offline':
+        return {
+          icon: <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />,
+          text: 'Offline',
+          color: 'text-red-500',
+          bg: 'bg-red-500/10'
+        };
+    }
+  };
+
+  const statusConfig = getStatusConfig();
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4 relative">
+      {/* Status Indicator - Top Right */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed top-4 right-4 z-50"
+      >
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-2 rounded-full backdrop-blur-md border shadow-lg",
+          statusConfig.bg,
+          statusConfig.color,
+          "border-current/20"
+        )}>
+          {statusConfig.icon}
+          <span className="text-xs font-medium hidden sm:inline">
+            {statusConfig.text}
+          </span>
+        </div>
+      </motion.div>
+
       <div className="relative">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -199,7 +311,45 @@ const LoadingScreen = () => {
           className="text-center"
         >
           <h1 className="text-2xl sm:text-3xl font-bold text-gradient mb-2">{t('logo')}</h1>
-          <p className="text-muted-foreground text-base sm:text-lg mb-6">Loading your AI companion</p>
+          <p className="text-muted-foreground text-base sm:text-lg mb-4">Loading your AI companion</p>
+          
+          {/* Status Message */}
+          <AnimatePresence mode="wait">
+            {backendStatus === 'waking' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex flex-col items-center gap-2 mt-4"
+              >
+                <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Server is waking up, please wait...</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This may take up to a minute
+                  {retryCount > 0 && ` (Attempt ${retryCount + 1}/5)`}
+                </p>
+              </motion.div>
+            )}
+            
+            {backendStatus === 'offline' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex flex-col items-center gap-2 mt-4"
+              >
+                <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+                  <XCircle className="w-4 h-4" />
+                  <span>Unable to connect to server</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Please refresh the page or try again later
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>
@@ -539,6 +689,7 @@ const ChatUI = () => {
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newChatName, setNewChatName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [backendReady, setBackendReady] = useState(false);
   const [assistantTyping, setAssistantTyping] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentView, setCurrentView] = useState<'welcome' | 'chat'>('welcome');
@@ -1013,10 +1164,43 @@ const handleStopRecording = async () => {
     }
   }, [messageInput, user, currentSessionId, assistantTyping, currentView, isTTSEnabled, isTTSPlaying, currentAudio, t]);
 
-  // Initialize component
+  // Initialize component - Updated
   useEffect(() => {
     const initialize = async () => {
       try {
+        // Wait for backend to be ready first
+        let backendOnline = false;
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        while (!backendOnline && attempts < maxAttempts) {
+          try {
+            const healthCheck = await fetch(`${API_BASE_URL}/`, {
+              cache: 'no-cache',
+              signal: AbortSignal.timeout(10000)
+            });
+            
+            if (healthCheck.ok) {
+              backendOnline = true;
+              setBackendReady(true);
+            } else {
+              attempts++;
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+          } catch (error) {
+            attempts++;
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+          }
+        }
+
+        if (!backendOnline) {
+          toast.error("Unable to connect to server. Please refresh the page.");
+          return;
+        }
+
+        // Proceed with user authentication
         const usr = await getUser();
         if (!usr) {
           navigate("/login");
@@ -1026,6 +1210,7 @@ const handleStopRecording = async () => {
         await fetchUserChats(usr.$id);
       } catch (error) {
         console.error("Initialization error:", error);
+        toast.error("Failed to initialize. Please refresh the page.");
         navigate("/login");
       } finally {
         setIsLoading(false);
@@ -1352,7 +1537,7 @@ const handleStopRecording = async () => {
   }, [navigate]);
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || !backendReady) {
     return <LoadingScreen />;
   }
 
