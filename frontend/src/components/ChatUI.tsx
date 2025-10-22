@@ -320,16 +320,44 @@ const LoadingScreen = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center gap-2 mt-4"
+                className="flex flex-col items-center gap-3 mt-4 max-w-md mx-auto"
               >
                 <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Server is waking up, please wait...</span>
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium">Server is waking up from its nap... ☕</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  This may take up to a minute
-                  {retryCount > 0 && ` (Attempt ${retryCount + 1}/5)`}
-                </p>
+                
+                {/* Fun explanatory message */}
+                <div className="text-xs text-muted-foreground text-center leading-relaxed space-y-2 px-4">
+                  <p className="italic">
+                    🎓 <span className="font-semibold">Student-built, free-tier magic!</span>
+                  </p>
+                  <p>
+                    Our server lives on a free cloud ☁️ (student budget, you know 😅)
+                    <br />
+                    It takes a quick coffee break when idle, but wakes up in ~1-2 minutes!
+                  </p>
+                  <p className="text-amber-600/80 dark:text-amber-400/80 font-medium">
+                    Usually ready in under a minute... worth the wait! ✨
+                  </p>
+                </div>
+
+                {retryCount > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "w-2 h-2 rounded-full transition-colors",
+                            i < retryCount ? "bg-amber-500" : "bg-muted"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span>Attempt {retryCount}/5</span>
+                  </div>
+                )}
               </motion.div>
             )}
             
@@ -338,14 +366,44 @@ const LoadingScreen = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center gap-2 mt-4"
+                className="flex flex-col items-center gap-3 mt-4 max-w-md mx-auto"
               >
                 <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-                  <XCircle className="w-4 h-4" />
-                  <span>Unable to connect to server</span>
+                  <XCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium">Hmm, server's still sleeping... 💤</span>
                 </div>
+                
+                <div className="text-xs text-muted-foreground text-center leading-relaxed space-y-2 px-4">
+                  <p>
+                    The free-tier server is taking a bit longer than usual.
+                    <br />
+                    <span className="font-semibold">Please refresh the page</span> to try again!
+                  </p>
+                  <p className="text-red-600/80 dark:text-red-400/80">
+                    It usually works perfectly - just needs a gentle nudge sometimes! 🔄
+                  </p>
+                </div>
+
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 gap-2"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Refresh Page
+                </Button>
+              </motion.div>
+            )}
+
+            {backendStatus === 'checking' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-4"
+              >
                 <p className="text-xs text-muted-foreground">
-                  Please refresh the page or try again later
+                  Connecting to server...
                 </p>
               </motion.div>
             )}
