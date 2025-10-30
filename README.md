@@ -29,6 +29,12 @@
 
 *Revolutionizing Language Accessibility with Advanced Agentic AI Architecture*
 
+<p>
+  <a href="https://buymeacoffee.com/himabuilds" target="_blank">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" />
+  </a>
+</p>
+
 ---
 
 **[🚀 Live Demo](https://odialingua.netlify.app/)** • 
