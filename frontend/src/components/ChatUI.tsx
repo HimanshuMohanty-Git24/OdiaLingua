@@ -324,24 +324,9 @@ const LoadingScreen = () => {
               >
                 <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">Server is waking up from its nap... ☕</span>
+                  <span className="font-medium">Server is initializing. Running on free-tier infrastructure—please allow a moment.</span>
                 </div>
                 
-                {/* Fun explanatory message */}
-                <div className="text-xs text-muted-foreground text-center leading-relaxed space-y-2 px-4">
-                  <p className="italic">
-                    🎓 <span className="font-semibold">Student-built, free-tier magic!</span>
-                  </p>
-                  <p>
-                    Our server lives on a free cloud ☁️ (student budget, you know 😅)
-                    <br />
-                    It takes a quick coffee break when idle, but wakes up in ~1-2 minutes!
-                  </p>
-                  <p className="text-amber-600/80 dark:text-amber-400/80 font-medium">
-                    Usually ready in under a minute... worth the wait! ✨
-                  </p>
-                </div>
-
                 {retryCount > 0 && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <div className="flex gap-1">
@@ -370,18 +355,7 @@ const LoadingScreen = () => {
               >
                 <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
                   <XCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-medium">Hmm, server's still sleeping... 💤</span>
-                </div>
-                
-                <div className="text-xs text-muted-foreground text-center leading-relaxed space-y-2 px-4">
-                  <p>
-                    The free-tier server is taking a bit longer than usual.
-                    <br />
-                    <span className="font-semibold">Please refresh the page</span> to try again!
-                  </p>
-                  <p className="text-red-600/80 dark:text-red-400/80">
-                    It usually works perfectly - just needs a gentle nudge sometimes! 🔄
-                  </p>
+                  <span className="font-medium">Server connection failed. Please refresh to try again.</span>
                 </div>
 
                 <Button
